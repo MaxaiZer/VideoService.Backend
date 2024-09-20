@@ -73,12 +73,10 @@ services:
     ports:
       - "443:443"
       - "80:80"
-      #- "9000:9000"
     depends_on:
       - minio
       - CoreService
     entrypoint: /bin/sh -c "chmod 777 /etc/nginx/convert-pfx.sh && /etc/nginx/convert-pfx.sh"
-    # "/etc/nginx/convert-pfx.sh"
     volumes:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - ./.aspnet/https:/https:ro
@@ -90,8 +88,8 @@ services:
       RABBITMQ_DEFAULT_USER: rabbitmq
       RABBITMQ_DEFAULT_PASS: rabbitmq
     ports:
-      - "127.0.0.1:15672:15672"  # UI
-      - "127.0.0.1:5672:5672"    # AMQP
+      - "127.0.0.1:15672:15672"
+      - "127.0.0.1:5672:5672"
     volumes:
       - rabbitmq_data:/var/lib/rabbitmq
     healthcheck:
@@ -99,7 +97,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
 
 volumes:
   minio_data:
