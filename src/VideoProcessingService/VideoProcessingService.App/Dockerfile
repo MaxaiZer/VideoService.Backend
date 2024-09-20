@@ -36,10 +36,4 @@ RUN dotnet publish "VideoProcessingService.App.csproj" -c $BUILD_CONFIGURATION -
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-
-RUN if ! command -v ffmpeg > /dev/null; then \
-        echo "ffmpeg not found"; \
-        exit 1; \
-    fi
-
 ENTRYPOINT ["dotnet", "VideoProcessingService.App.dll"]
