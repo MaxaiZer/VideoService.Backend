@@ -404,3 +404,4 @@ internal_logs
 .idea
 *.dcproj
 qodana.yaml
+!docker-compose.dcproj
