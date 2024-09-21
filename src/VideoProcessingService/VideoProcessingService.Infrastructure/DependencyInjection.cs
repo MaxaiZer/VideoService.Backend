@@ -100,8 +100,6 @@ public static class DependencyInjection
     
     private static IServiceCollection ConfigureUnitOfWork(this IServiceCollection services)
     {
-        services.AddScoped<IVideoProcessingRequestRepository, VideoProcessingRequestRepository>();
-        services.AddScoped<IVideoRepository, VideoRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         return services;
     }
