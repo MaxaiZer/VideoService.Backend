@@ -1,6 +1,6 @@
 services:
   VideoProcessingService:
-    image: maxaizer/video-processing-service:latest
+    image: ghcr.io/maxaizer/video-processing-service:latest
     build:
       context: .
       dockerfile: src/VideoProcessingService/VideoProcessingService.App/Dockerfile
@@ -17,7 +17,7 @@ services:
       replicas: 1
   
   CoreService:
-    image: maxaizer/video-core-service:latest
+    image: ghcr.io/maxaizer/video-core-service:latest
     build:
       context: .
       dockerfile: src/CoreService/CoreService.Api/Dockerfile
