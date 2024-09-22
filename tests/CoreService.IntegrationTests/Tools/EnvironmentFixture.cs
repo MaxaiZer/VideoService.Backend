@@ -14,8 +14,8 @@ namespace CoreService.IntegrationTests.Tools
 
     public class EnvironmentFixture : IAsyncLifetime
     {
-        private List<IContainer> _containers = [];
-        private readonly string postgresConnectionString;
+        private readonly List<IContainer> _containers = [];
+        private readonly string _postgresConnectionString;
 
         public EnvironmentFixture()
         {
@@ -25,8 +25,9 @@ namespace CoreService.IntegrationTests.Tools
 
             var configuration = builder.Build();
 
-            var connectionString = configuration.GetConnectionString("DefaultConnection");
-            postgresConnectionString = connectionString;
+            var connectionString = configuration.GetConnectionString("DefaultConnection") ??
+                                   throw new Exception("Connection string is null");
+            _postgresConnectionString = connectionString;
             var connectionStringBuilder = new DbConnectionStringBuilder { ConnectionString = connectionString };
 
             var dbName = connectionStringBuilder["Database"].ToString();
@@ -39,7 +40,7 @@ namespace CoreService.IntegrationTests.Tools
                 .WithEnvironment("POSTGRES_DB", dbName)
                 .WithEnvironment("POSTGRES_USER", user)
                 .WithEnvironment("POSTGRES_PASSWORD", password)
-                .WithPortBinding(port, false)
+                .WithPortBinding(port)
                 .WithCleanUp(true)
                 .Build()
             );
@@ -49,8 +50,8 @@ namespace CoreService.IntegrationTests.Tools
                 .WithCommand("server", "/data")
                 .WithEnvironment("MINIO_ROOT_USER", configuration.GetSection("MinIO")["AccessKey"])
                 .WithEnvironment("MINIO_ROOT_PASSWORD", configuration.GetSection("MinIO")["SecretKey"])
-                .WithPortBinding(9000, false)
-                .WithPortBinding(9001, false)
+                .WithPortBinding(9000)
+                .WithPortBinding(9001)
                 .WithCleanUp(true)
                 .Build()
             );
@@ -58,24 +59,22 @@ namespace CoreService.IntegrationTests.Tools
 
         private async Task EnsurePostgresIsReady()
         {
-            await using var connection = new NpgsqlConnection(postgresConnectionString);
-
-            // Create a Polly retry policy
+            await using var connection = new NpgsqlConnection(_postgresConnectionString);
+            
             var retryPolicy = Policy
-                .Handle<Exception>() // Handle any exception
+                .Handle<Exception>() 
                 .WaitAndRetryAsync(
-                    retryCount: 10, // Retry up to 10 times
-                    sleepDurationProvider: _ => TimeSpan.FromSeconds(2), // Wait 2 seconds between retries
-                    onRetry: (exception, timeSpan, retryCount, context) =>
+                    retryCount: 10, 
+                    sleepDurationProvider: _ => TimeSpan.FromSeconds(2),
+                    onRetry: (exception, timeSpan, retryCount, _) =>
                     {
                         Console.WriteLine(
                             $"Waiting for PostgreSQL to be ready. Retry {retryCount} after {timeSpan}. Exception: {exception.Message}");
                     });
-
-            // Execute the retry policy
+            
             await retryPolicy.ExecuteAsync(async () =>
             {
-                await connection.OpenAsync(); // Try to open the connection
+                await connection.OpenAsync();
             });
         }
 
