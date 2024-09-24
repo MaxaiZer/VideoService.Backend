@@ -48,17 +48,9 @@ namespace VideoProcessingService.Core.Services
 
                     await inputStream.CopyToAsync(fileStream);
                 }
-
+                
                 var res = await _videoConverter.ConvertToHlsAsync(inputFilePath, tmpDirectory);
-
-                var tasks = new List<Task>
-                {
-                    StoreFileAsync(videoId, res.MasterPlaylistPath, isMasterPlaylist: true)
-                };
-
-                tasks.AddRange(res.PlaylistsFilePaths.Select(file => StoreFileAsync(request.VideoId, file, isMasterPlaylist: false)));
-                tasks.AddRange(res.SegmentsFilePaths.Select(file => StoreFileAsync(request.VideoId, file, isMasterPlaylist: false)));
-                await Task.WhenAll(tasks);
+                await StoreResultFilesAsync(videoId, res);
                 
                 _unitOfWork.BeginTransaction();
                 
@@ -87,6 +79,18 @@ namespace VideoProcessingService.Core.Services
                 if (Directory.Exists(tmpDirectory))
                     Directory.Delete(tmpDirectory, recursive: true);
             }
+        }
+
+        private async Task StoreResultFilesAsync(string videoId, HlsConversionResult res)
+        {
+            var tasks = new List<Task>
+            {
+                StoreFileAsync(videoId, res.MasterPlaylistPath, isMasterPlaylist: true)
+            };
+
+            tasks.AddRange(res.PlaylistsFilePaths.Select(file => StoreFileAsync(videoId, file, isMasterPlaylist: false)));
+            tasks.AddRange(res.SegmentsFilePaths.Select(file => StoreFileAsync(videoId, file, isMasterPlaylist: false)));
+            await Task.WhenAll(tasks);
         }
 
         private async Task StoreFileAsync(string videoId, string filePath, bool isMasterPlaylist)
