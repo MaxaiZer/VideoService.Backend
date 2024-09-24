@@ -68,10 +68,9 @@ namespace CoreService.Api.Controllers
 
             return File(playlist, "application/vnd.apple.mpegurl");
         }
-
-        //todo: correct summary
+        
         /// <summary>
-        /// Retrieves a specific file,related to video.
+        /// Retrieves a specific file, related to video.
         /// </summary>
         /// <param name="videoId">The ID of the video.</param>
         /// <param name="fileName">The name of the file.</param>
