@@ -36,7 +36,7 @@ namespace CoreService.UnitTests.ApiTests
         [Fact]
         public async Task Upload_WhenValidDataIsProvided_ShouldSetUserIdAndReturnOkResult()
         {
-            var userId = Guid.NewGuid().ToString(); // Mocked UserId
+            var userId = Guid.NewGuid().ToString();
 
             var claims = new List<Claim>
             {
