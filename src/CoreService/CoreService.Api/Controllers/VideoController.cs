@@ -60,7 +60,7 @@ namespace CoreService.Api.Controllers
         /// <returns>HTTP 200 status code with the master playlist file if found; otherwise, returns a 404 status code.</returns>
         /// <response code="200">Master playlist retrieved successfully.</response>
         /// <response code="404">Master playlist not found.</response>
-        [HttpGet("{videoId}/file/master-playlist")]
+        [HttpGet("{videoId}/files/master-playlist")]
         public async Task<IActionResult> GetMasterPlaylist(Guid videoId)
         {
             var playlist = await _videoService.GetMasterPlaylist(videoId);
@@ -78,7 +78,7 @@ namespace CoreService.Api.Controllers
         /// <returns>HTTP 200 status code with the file if found; otherwise, returns a 404 status code.</returns>
         /// <response code="200">File retrieved successfully.</response>
         /// <response code="404">File not found.</response>
-        [HttpGet("{videoId:guid}/file/{fileName:regex(^.*\\.(m3u8|ts)$)}")]
+        [HttpGet("{videoId:guid}/files/{fileName:regex(^.*\\.(m3u8|ts)$)}")]
         public async Task<IActionResult> GetSubFile(Guid videoId, string fileName)
         {
             var file = await _videoService.GetSubFile(videoId, fileName);
