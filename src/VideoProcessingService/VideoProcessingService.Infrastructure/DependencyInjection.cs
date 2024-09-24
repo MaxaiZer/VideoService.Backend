@@ -93,6 +93,10 @@ public static class DependencyInjection
             throw new ArgumentNullException(nameof(nlogConfigPath),
                 "NLog configuration path is missing in configuration.");
 
+        var fullPath = Path.Combine(Directory.GetCurrentDirectory(), nlogConfigPath);
+        if (!File.Exists(fullPath))
+            throw new FileNotFoundException($"NLog configuration file not found at path: {fullPath}");
+        
         LogManager.Setup().LoadConfigurationFromFile(Path.Combine(Directory.GetCurrentDirectory(), nlogConfigPath));
         services.AddSingleton<ILoggerManager, LoggerManager>();
         return services;
