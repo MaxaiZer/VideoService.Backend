@@ -16,8 +16,10 @@ namespace CoreService.Infrastructure.Data.Repositories
         public IQueryable<T> FindAll(bool trackChanges) =>
             trackChanges ? context.Set<T>() : context.Set<T>().AsNoTracking();
 
-        public IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression, bool trackChanges) =>
-            trackChanges ? context.Set<T>().Where(expression) : context.Set<T>().Where(expression).AsNoTracking();
+        public async Task<List<T>> FindByConditionAsync(Expression<Func<T, bool>> expression, bool trackChanges) =>
+            trackChanges 
+                ? await context.Set<T>().Where(expression).ToListAsync() 
+                : await context.Set<T>().Where(expression).AsNoTracking().ToListAsync();
 
         public void Create(T entity) => context.Set<T>().Add(entity);
         public void Update(T entity) => context.Set<T>().Update(entity);

@@ -5,7 +5,7 @@ namespace Domain.Interfaces.Repositories
     public interface IRepositoryBase<T>
     {
         IQueryable<T> FindAll(bool trackChanges);
-        IQueryable<T> FindByCondition(Expression<Func<T, bool>> expression,
+        Task<List<T>> FindByConditionAsync(Expression<Func<T, bool>> expression,
         bool trackChanges);
         void Create(T entity);
         void Update(T entity);
