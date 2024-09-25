@@ -15,7 +15,7 @@ public class UnitOfWork: IUnitOfWork
 
     public UnitOfWork(IConfiguration configuration)
     {
-        _connection = new NpgsqlConnection(configuration.GetConnectionString("DefaultConnection") 
+        _connection = new NpgsqlConnection(Environment.GetEnvironmentVariable("DB_CONNECTION_STRING")
                                            ?? throw new Exception("Can't find a connection string"));
         VideoProcessingRequests = new VideoProcessingRequestRepository(_connection);
         Videos = new VideoRepository(_connection);

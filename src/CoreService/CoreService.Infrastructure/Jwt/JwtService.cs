@@ -12,17 +12,12 @@ namespace CoreService.Infrastructure.Jwt;
 public class JwtService : IJwtService
 {
     private readonly JwtConfiguration _config;
-    private readonly string _secretKey;
     
     private const string _securityAlgorithm = SecurityAlgorithms.HmacSha256;
 
     public JwtService(IOptions<JwtConfiguration> jwtConfiguration)
     {
         _config = jwtConfiguration.Value;
- 
-        _secretKey = Environment.GetEnvironmentVariable("SECRET") ??
-                     throw new NullReferenceException(
-                         $"{nameof(JwtService)}: empty environment variable for secret key");
     }
 
     public string CreateAccessToken(List<Claim> claims)
@@ -47,7 +42,7 @@ public class JwtService : IJwtService
     public ClaimsPrincipal GetPrincipalFromToken(string token)
     {
         var f = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(_secretKey));
+            Encoding.UTF8.GetBytes(_config.SecretKey));
         
         var tokenValidationParameters = new TokenValidationParameters
         {
@@ -86,7 +81,7 @@ public class JwtService : IJwtService
     
     private SigningCredentials GetSigningCredentials()
     {
-        var key = Encoding.UTF8.GetBytes(_secretKey);
+        var key = Encoding.UTF8.GetBytes(_config.SecretKey);
         var secret = new SymmetricSecurityKey(key);
         return new SigningCredentials(secret, _securityAlgorithm);
     }

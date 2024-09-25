@@ -5,7 +5,14 @@ services:
       context: .
       dockerfile: src/VideoProcessingService/VideoProcessingService.App/Dockerfile
     environment:
-      RabbitMQ:Host: rabbitmq
+      MINIO__ENDPOINT: ${MINIO__ENDPOINT}
+      MINIO__AccessKey: ${MINIO_ROOT_USER}
+      MINIO__SecretKey: ${MINIO_ROOT_PASSWORD}
+      MINIO__BucketName: ${BUCKET_NAME}
+      MessageBroker__HOST: rabbitmq
+      MessageBroker__USERNAME: ${RABBITMQ_USER}
+      MessageBroker__PASSWORD: ${RABBITMQ_PASSWORD}
+      DB_CONNECTION_STRING: "Server=db;Port=5432;Database=${POSTGRES_DB};User Id=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};"
     depends_on:
       db:
         condition: service_healthy
@@ -22,9 +29,16 @@ services:
       context: .
       dockerfile: src/CoreService/CoreService.Api/Dockerfile
     environment:
-      MinIO:PublicHost: ${SERVER_IP}/storage
-      RabbitMQ:Host: rabbitmq
-      SECRET: dont_steal_my_super_secret_key_please
+      MINIO__ENDPOINT: ${MINIO__ENDPOINT}
+      MINIO__PublicHost: ${SERVER_IP}/storage
+      MINIO__AccessKey: ${MINIO_ROOT_USER}
+      MINIO__SecretKey: ${MINIO_ROOT_PASSWORD}
+      MINIO__BucketName: ${BUCKET_NAME}
+      MessageBroker__HOST: rabbitmq
+      MessageBroker__USERNAME: ${RABBITMQ_USER}
+      MessageBroker__PASSWORD: ${RABBITMQ_PASSWORD}
+      DB_CONNECTION_STRING: "Server=db;Port=5432;Database=${POSTGRES_DB};User Id=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};"
+      JWT_SECRET: ${JWT_SECRET}
       ASPNETCORE_Kestrel__Certificates__Default__Path: /https/aspnetapp.pfx
       ASPNETCORE_Kestrel__Certificates__Default__Password: qwerty
     depends_on:
@@ -62,16 +76,16 @@ services:
 
   db:
     image: postgres:latest
-    environment:
-      POSTGRES_DB: video_db
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+    environment:    
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
       - pg_data:/var/lib/postgresql/data
     ports:
       - "127.0.0.1:5432:5432"
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -93,8 +107,8 @@ services:
   rabbitmq:
     image: rabbitmq:3.13-management
     environment:
-      RABBITMQ_DEFAULT_USER: rabbitmq
-      RABBITMQ_DEFAULT_PASS: rabbitmq
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
     ports:
       - "127.0.0.1:15672:15672"
       - "127.0.0.1:5672:5672"

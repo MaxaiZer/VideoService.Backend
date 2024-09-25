@@ -113,7 +113,7 @@ public static class DependencyInjection
     private static IServiceCollection ConfigurePostgres(this IServiceCollection services,
         IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
         if (string.IsNullOrEmpty(connectionString))
             throw new ArgumentNullException(nameof(connectionString), "PostgreSQL connection string is missing.");
         
@@ -156,10 +156,6 @@ public static class DependencyInjection
         
         var serviceProvider = services.BuildServiceProvider();
         var jwtConfig = serviceProvider.GetRequiredService<IOptions<JwtConfiguration>>().Value;
-        
-        var secretKey = Environment.GetEnvironmentVariable("SECRET") ??
-                        throw new NullReferenceException(
-                            $"{nameof(ConfigureJwt)}: empty environment variable for secret key");
 
         services.AddAuthentication(opt =>
             {
@@ -177,7 +173,7 @@ public static class DependencyInjection
                     ValidIssuer = jwtConfig.ValidIssuer,
                     ValidAudience = jwtConfig.ValidAudience,
                     IssuerSigningKey = new
-                        SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+                        SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.SecretKey))
                 };
             });
         

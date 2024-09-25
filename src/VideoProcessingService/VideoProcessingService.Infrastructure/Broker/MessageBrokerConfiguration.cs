@@ -5,7 +5,7 @@ namespace VideoProcessingService.Infrastructure.Broker;
 public class MessageBrokerConfiguration
 {
     [Required]
-    public static string Section => "MessageBrokerSettings";
+    public static string Section => "MessageBroker";
     [Required]
     public string Host { get; set; }
     [Required]
