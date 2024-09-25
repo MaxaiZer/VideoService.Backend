@@ -32,6 +32,8 @@ namespace VideoProcessingService.Infrastructure.Converters
             var segments = Directory.GetFiles(outputDirectory, "*.ts");
             var playlists = Directory.GetFiles(outputDirectory, "*.m3u8").ToList();
             playlists.Remove(masterPlaylistPath);
+
+            LogSegmentsSize(segments);
             
             return new HlsConversionResult(
                 MasterPlaylistPath: masterPlaylistPath,
@@ -75,6 +77,32 @@ namespace VideoProcessingService.Infrastructure.Converters
             
             if (process.ExitCode != 0) //don't use errors.Length != 0, ffmpeg logs all in error
                 throw new Exception(errors);
+        }
+        
+        private void LogSegmentsSize(IEnumerable<string> segments)
+        {
+            var segmentSizesByResolution = new Dictionary<string, long>();
+            
+            foreach (var segment in segments)
+            {
+                var resolution = Path.GetFileName(segment).Split('_')[1];
+                var size = new FileInfo(segment).Length;
+                
+                if (!segmentSizesByResolution.TryAdd(resolution, size))
+                {
+                    segmentSizesByResolution[resolution] += size;
+                }
+            }
+
+            double totalSizeMb = 0;
+            foreach (var resolution in segmentSizesByResolution.Keys)
+            {
+                var sizeMb = segmentSizesByResolution[resolution] / 1024.0 / 1024.0;
+                totalSizeMb += sizeMb;
+                Console.WriteLine($"Total size for resolution {resolution}: {sizeMb:F2} MB");
+            }
+            
+            Console.WriteLine($"Total size for all resolutions: {totalSizeMb:F2} MB");
         }
     }
 }
