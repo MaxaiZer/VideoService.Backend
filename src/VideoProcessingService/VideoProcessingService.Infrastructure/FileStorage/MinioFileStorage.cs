@@ -16,54 +16,7 @@ namespace VideoProcessingService.Infrastructure.FileStorage
         {
             _client = client;
             _config = minioConfiguration.Value;
-            InitializeBucketAsync().GetAwaiter().GetResult(); // Initialize the bucket
         }
-
-        private async Task InitializeBucketAsync()
-        {
-            bool found = false;
-
-            try
-            {
-                // Check if the bucket exists
-                var args = new BucketExistsArgs().WithBucket(_config.BucketName);
-                var bucketExists = await _client.BucketExistsAsync(args);
-                found = bucketExists;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error checking bucket existence: {ex.Message}");
-            }
-
-            if (!found)
-            {
-                try
-                {
-                    /*
-                    // Create the bucket if it does not exist
-                    new MakeBucketArgs().W
-                    await _client.MakeBucketAsync(_defaultBucket);
-
-                    var config = new LifecycleConfiguration();
-                    config.Rules.Add(
-                        new LifecycleRule { Expiration = new Expiration { Days = 1 } }
-                    );
-
-                    await _client.SetBucketLifecycleAsync(bucketName, lifecyclePolicy);
-
-                    Console.WriteLine($"Bucket '{_defaultBucket}' created successfully.");
-                    */
-                    var args = new MakeBucketArgs().WithBucket(_config.BucketName);
-                    await _client.MakeBucketAsync(args);
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error creating bucket: {ex.Message}");
-                    throw; // Rethrow to handle the exception at a higher level if necessary
-                }
-            }
-        }
-
 
         public async Task<Stream> GetFileAsync(string name)
         {

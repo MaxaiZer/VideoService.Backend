@@ -10,7 +10,7 @@ services:
       db:
         condition: service_healthy
       minio:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
     deploy:
@@ -31,7 +31,7 @@ services:
       db:
         condition: service_healthy
       minio:
-        condition: service_started
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
     ports:
@@ -43,14 +43,22 @@ services:
   minio:
     image: minio/minio:latest
     environment:
-      MINIO_ROOT_USER: minioadmin
-      MINIO_ROOT_PASSWORD: minioadmin
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      BUCKET_NAME: ${BUCKET_NAME}
     volumes:
       - minio_data:/data
+      - ./minio-setup.sh:/usr/local/bin/minio-setup.sh
     ports:
       - "127.0.0.1:9000:9000"
       - "127.0.0.1:9001:9001"
+    entrypoint: ["/bin/sh", "/usr/local/bin/minio-setup.sh"]
     command: server --console-address ":9001" /data
+    healthcheck:
+      test: "/usr/bin/mc alias set myminio http://127.0.0.1:9000 ${MINIO_ROOT_USER} ${MINIO_ROOT_PASSWORD} && /usr/bin/mc ls myminio/${BUCKET_NAME} || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   db:
     image: postgres:latest
