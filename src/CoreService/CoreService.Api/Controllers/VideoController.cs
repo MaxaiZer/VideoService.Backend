@@ -52,7 +52,24 @@ namespace CoreService.Api.Controllers
             await _videoService.AddVideo(videoUploadDto);
             return Ok();
         }
+        
+        /// <summary>
+        /// Retrieves a video metadata.
+        /// </summary>
+        /// <param name="videoId">Id of the video.</param>
+        /// <returns>HTTP 200 status code with video metadata if the video exists.</returns>
+        /// <response code="200">Video metadata retrieved successfully.</response>
+        /// <response code="400">Video wasn't found.</response>
+        [HttpGet("{videoId}")]
+        public async Task<IActionResult> GetMetadata(string videoId)
+        {
+            var video = await _videoService.GetVideoMetadata(videoId);
+            if (video == null)
+                return BadRequest();
 
+            return Ok(video);
+        }
+        
         /// <summary>
         /// Retrieves the master playlist file for the specified video.
         /// </summary>

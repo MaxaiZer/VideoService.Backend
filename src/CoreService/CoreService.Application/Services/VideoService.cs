@@ -58,6 +58,13 @@ namespace CoreService.Application.Services
             }
         }
 
+        public async Task<Video?> GetVideoMetadata(string id)
+        {
+            var list = await _unitOfWork.Videos.FindByConditionAsync(v => v.Id == id && v.Processed,
+                trackChanges: false);
+            return list.FirstOrDefault();
+        }
+        
         public async Task<GeneratedUploadUrlDto> GeneratePresignedUploadLink()
         {
             string url;

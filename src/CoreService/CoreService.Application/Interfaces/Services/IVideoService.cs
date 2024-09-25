@@ -1,10 +1,14 @@
 ﻿using CoreService.Application.Dto;
+using Domain.Entities;
 
 namespace CoreService.Application.Interfaces.Services
 {
     public interface IVideoService
     {
         public Task AddVideo(VideoUploadDto videoUploadDto);
+        
+        public Task<Video?> GetVideoMetadata(string id);
+        
         public Task<GeneratedUploadUrlDto> GeneratePresignedUploadLink();
 
         public Task<Stream?> GetMasterPlaylist(Guid videoId);
