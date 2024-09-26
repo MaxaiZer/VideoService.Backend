@@ -76,19 +76,4 @@ public class IdentityService : IIdentityService
 
         return result.ToApplicationResult();
     }
-    
-    /*private async Task<List<Claim>> GetUserClaims() ToDo: clean up
-{
-    var claims = new List<Claim>
-     {
-        new(ClaimTypes.Name, _user.UserName)
-     };
-
-    var roles = await _userManager.GetRolesAsync(_user.Id);
-    foreach (var role in roles)
-    {
-        claims.Add(new Claim(ClaimTypes.Role, role));
-    }
-    return claims;
-}*/
 }
