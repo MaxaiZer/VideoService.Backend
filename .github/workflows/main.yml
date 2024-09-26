@@ -48,7 +48,7 @@ jobs:
 
     - name: Run tests
       env:
-        SECRET: ${{ secrets.MY_SECRET_KEY }}
+        JWT_SECRET: ${{ secrets.JWT_SECRET }}
       run: |
         dotnet test VideoService.sln
 
