@@ -22,11 +22,8 @@ namespace CoreService.Application.Services
 
         public async Task<Result> RegisterUser(UserForRegistrationDto userForRegistration)
         {
-            var (result, userId) = await _identityService.
+            var (result, _) = await _identityService.
                 CreateUserAsync(userForRegistration.UserName, userForRegistration.Password);
-            
-            //  if (result.Succeeded) ToDO: clean up
-            //     await _userManager.AddToRolesAsync(user, userForRegistration.Roles);
             
             return result;
         }
@@ -44,7 +41,6 @@ namespace CoreService.Application.Services
         
         public async Task<TokenDto> CreateTokens(IApplicationUser user)
         {
-            //    var claims = await GetClaims(user);  // Get claims based on the user
             var accessToken = _jwtService.CreateAccessToken(claims: [new Claim(ClaimTypes.NameIdentifier, user.Id)]);
             var refreshTokenResult = _jwtService.CreateRefreshToken();
 
