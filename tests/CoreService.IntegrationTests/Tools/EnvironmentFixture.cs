@@ -15,19 +15,26 @@ namespace CoreService.IntegrationTests.Tools
     public class EnvironmentFixture : IAsyncLifetime
     {
         private readonly List<IContainer> _containers = [];
-        private readonly string _postgresConnectionString;
+        private string _postgresConnectionString;
 
         public EnvironmentFixture()
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile("appsettings.Integration.json", optional: false, reloadOnChange: true);
 
             var configuration = builder.Build();
 
-            var connectionString = configuration.GetConnectionString("DefaultConnection") ??
-                                   throw new Exception("Connection string is null");
-            _postgresConnectionString = connectionString;
+            CreatePostgresContainer(configuration);
+            CreateMinioContainer(configuration);
+        }
+
+        private void CreatePostgresContainer(IConfiguration configuration)
+        {
+            var connectionString = configuration["DB_CONNECTION_STRING"];
+            _postgresConnectionString = connectionString ?? throw new Exception("Connection string is null");
+            
             var connectionStringBuilder = new DbConnectionStringBuilder { ConnectionString = connectionString };
 
             var dbName = connectionStringBuilder["Database"].ToString();
@@ -44,19 +51,35 @@ namespace CoreService.IntegrationTests.Tools
                 .WithCleanUp(true)
                 .Build()
             );
+        }
 
+        private void CreateMinioContainer(IConfiguration configuration)
+        {
+            var solutionDir = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", ".."));
+            var scriptSourcePath = Path.Combine(solutionDir, "minio-setup.sh");
+
+            if (!File.Exists(scriptSourcePath))
+                throw new Exception("Minio setup script doesn't exist");
+            
+            var accessKey = configuration.GetSection("MinIO")["AccessKey"] ?? throw new Exception("AccessKey is null");
+            var secretKey = configuration.GetSection("MinIO")["SecretKey"]?? throw new Exception("SecretKey is null");
+            var bucketName = configuration.GetSection("MinIO")["BucketName"]?? throw new Exception("BucketName is null");
+            
             _containers.Add(new ContainerBuilder()
                 .WithImage("minio/minio:latest")
-                .WithCommand("server", "/data")
-                .WithEnvironment("MINIO_ROOT_USER", configuration.GetSection("MinIO")["AccessKey"])
-                .WithEnvironment("MINIO_ROOT_PASSWORD", configuration.GetSection("MinIO")["SecretKey"])
+                .WithEntrypoint("/bin/sh", "/usr/local/bin/minio-setup.sh")
+                .WithCommand("server", "--console-address", ":9001", "/data")
+                .WithEnvironment("MINIO_ROOT_USER", accessKey)
+                .WithEnvironment("MINIO_ROOT_PASSWORD", secretKey)
+                .WithEnvironment("BUCKET_NAME",bucketName)
                 .WithPortBinding(9000)
                 .WithPortBinding(9001)
+                .WithResourceMapping(scriptSourcePath, "/usr/local/bin")
                 .WithCleanUp(true)
                 .Build()
             );
         }
-
+        
         private async Task EnsurePostgresIsReady()
         {
             await using var connection = new NpgsqlConnection(_postgresConnectionString);
