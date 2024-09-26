@@ -113,7 +113,7 @@ public static class DependencyInjection
     private static IServiceCollection ConfigurePostgres(this IServiceCollection services,
         IConfiguration configuration)
     {
-        var connectionString = Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
+        var connectionString = configuration["DB_CONNECTION_STRING"];
         if (string.IsNullOrEmpty(connectionString))
             throw new ArgumentNullException(nameof(connectionString), "PostgreSQL connection string is missing.");
         
