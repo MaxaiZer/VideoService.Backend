@@ -62,8 +62,8 @@ namespace CoreService.IntegrationTests.Tools
                 throw new Exception("Minio setup script doesn't exist");
             
             var accessKey = configuration.GetSection("MinIO")["AccessKey"] ?? throw new Exception("AccessKey is null");
-            var secretKey = configuration.GetSection("MinIO")["SecretKey"]?? throw new Exception("SecretKey is null");
-            var bucketName = configuration.GetSection("MinIO")["BucketName"]?? throw new Exception("BucketName is null");
+            var secretKey = configuration.GetSection("MinIO")["SecretKey"] ?? throw new Exception("SecretKey is null");
+            var bucketName = configuration.GetSection("MinIO")["BucketName"] ?? throw new Exception("BucketName is null");
             
             _containers.Add(new ContainerBuilder()
                 .WithImage("minio/minio:latest")
