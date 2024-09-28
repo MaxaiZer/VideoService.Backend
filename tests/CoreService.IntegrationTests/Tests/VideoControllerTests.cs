@@ -13,7 +13,7 @@ namespace CoreService.IntegrationTests.Tests
     public class VideoControllerTests : IClassFixture<TestingWebAppFactory>
     {
         private readonly HttpClient _client;
-        private string _baseUrl = "api/videos";
+        private const string _baseUrl = "api/videos";
 
         public VideoControllerTests(TestingWebAppFactory factory)
         {

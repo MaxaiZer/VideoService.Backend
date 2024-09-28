@@ -10,7 +10,7 @@ namespace CoreService.IntegrationTests.Tests;
 public class AuthControllerTests: IClassFixture<TestingWebAppFactory>
 {
         private readonly HttpClient _client;
-        private string _baseUrl = "api/auth";
+        private const string _baseUrl = "api/auth";
 
         public AuthControllerTests(TestingWebAppFactory factory)
         {
