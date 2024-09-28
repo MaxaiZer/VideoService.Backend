@@ -65,7 +65,7 @@ namespace CoreService.Application.Services
             return list.FirstOrDefault();
         }
         
-        public async Task<GeneratedUploadUrlDto> GeneratePresignedUploadLink()
+        public async Task<GeneratedUploadUrlDto> GetUploadUrl()
         {
             string url;
             var fileName = Guid.NewGuid().ToString();
@@ -77,7 +77,7 @@ namespace CoreService.Application.Services
             catch (Exception ex)
             {
                 _logger.LogError($"Something went wrong in the " +
-                    $"{nameof(GeneratePresignedUploadLink)} service method: {ex}");
+                    $"{nameof(GetUploadUrl)} service method: {ex}");
                 throw;
             }
 

@@ -42,9 +42,9 @@ namespace CoreService.IntegrationTests.Tests
         }
         
         [Fact]
-        public async Task GetPresignedUploadUrl_WhenUnauthorizedUser_ShouldReturnUnauthorized()
+        public async Task GetUploadUrl_WhenUnauthorizedUser_ShouldReturnUnauthorized()
         {
-            var response = await _client.GetAsync($"{_baseUrl}/presigned-upload-url");
+            var response = await _client.GetAsync($"{_baseUrl}/upload-url");
             
             response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
         }
@@ -119,7 +119,7 @@ namespace CoreService.IntegrationTests.Tests
         */
         async Task<string> UploadVideoAndInfo(string videoFilePath)
         {
-            var getUrlResponse = await _client.GetAsync($"{_baseUrl}/presigned-upload-url");
+            var getUrlResponse = await _client.GetAsync($"{_baseUrl}/upload-url");
             getUrlResponse.EnsureSuccessStatusCode();
             
             var getUrlResponseContent = await getUrlResponse.Content.ReadAsStringAsync();

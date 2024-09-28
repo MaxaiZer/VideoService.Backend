@@ -21,13 +21,13 @@ namespace CoreService.UnitTests.ApiTests
         }
 
         [Fact]
-        public async Task GetPresignedUploadUrl_WhenCalled_ShouldReturnOkResultWithUrl()
+        public async Task GetUploadUrl_WhenCalled_ShouldReturnOkResultWithUrl()
         {
             var result = new GeneratedUploadUrlDto("http://example.com","fileName" );
-            _mockVideoService.Setup(service => service.GeneratePresignedUploadLink())
+            _mockVideoService.Setup(service => service.GetUploadUrl())
                 .ReturnsAsync(result);
 
-            var actionResult = await _controller.GetPresignedUploadUrl();
+            var actionResult = await _controller.GetUploadUrl();
 
             actionResult.Should().BeOfType<OkObjectResult>()
                 .Which.Value.Should().Be(result);

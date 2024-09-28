@@ -9,7 +9,7 @@ namespace CoreService.Application.Interfaces.Services
         
         public Task<Video?> GetVideoMetadata(string id, CancellationToken cancellationToken = default);
         
-        public Task<GeneratedUploadUrlDto> GeneratePresignedUploadLink();
+        public Task<GeneratedUploadUrlDto> GetUploadUrl();
 
         public Task<Stream?> GetMasterPlaylist(Guid videoId);
 

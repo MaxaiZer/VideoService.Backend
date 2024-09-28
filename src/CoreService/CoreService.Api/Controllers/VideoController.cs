@@ -24,11 +24,11 @@ namespace CoreService.Api.Controllers
         /// <returns>HTTP 200 status code with the presigned upload URL if successful; otherwise, returns a 401 status code if authentication fails.</returns>
         /// <response code="200">Presigned upload URL generated successfully.</response>
         /// <response code="401">Authentication failed.</response>
-        [HttpGet("presigned-upload-url")]
+        [HttpGet("upload-url")]
         [Authorize]
-        public async Task<IActionResult> GetPresignedUploadUrl()
+        public async Task<IActionResult> GetUploadUrl()
         {
-            var res = await _videoService.GeneratePresignedUploadLink();
+            var res = await _videoService.GetUploadUrl();
             return Ok(res);
         }
 
