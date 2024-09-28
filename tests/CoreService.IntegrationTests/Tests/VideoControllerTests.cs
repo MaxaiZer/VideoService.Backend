@@ -25,7 +25,7 @@ namespace CoreService.IntegrationTests.Tests
         {
             var videoId = new Guid("11111111-1111-1111-1111-111111111111");
 
-            var response = await _client.GetAsync($"{_baseUrl}/{videoId}/playlist");
+            var response = await _client.GetAsync($"{_baseUrl}/{videoId}/files/master-playlist");
 
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         }
@@ -36,7 +36,7 @@ namespace CoreService.IntegrationTests.Tests
             var videoId = new Guid("22222222-2222-2222-2222-222222222222");
             var segmentName = "out0.ts";
 
-            var response = await _client.GetAsync($"{_baseUrl}/{videoId}/segment/{segmentName}");
+            var response = await _client.GetAsync($"{_baseUrl}/{videoId}/files/{segmentName}");
 
             response.StatusCode.Should().Be(HttpStatusCode.NotFound);
         }
