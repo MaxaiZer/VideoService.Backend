@@ -39,7 +39,7 @@ namespace CoreService.Application.Services
             return (user, result);
         }
         
-        public async Task<TokenDto> CreateTokens(IApplicationUser user)
+        public async Task<TokenPair> CreateTokens(IApplicationUser user)
         {
             var accessToken = _jwtService.CreateAccessToken(claims: [new Claim(ClaimTypes.NameIdentifier, user.Id)]);
             var refreshTokenResult = _jwtService.CreateRefreshToken();
@@ -50,7 +50,7 @@ namespace CoreService.Application.Services
             var res = await _identityService.UpdateUserAsync(user);
             if (res.Succeeded)
             {
-                return new TokenDto(accessToken, refreshTokenResult.RefreshToken);
+                return new TokenPair(accessToken, refreshTokenResult.RefreshToken);
             }
             
             var errorMessages = string.Join(", ", res.Errors);
@@ -60,7 +60,7 @@ namespace CoreService.Application.Services
             throw new Exception(error);
         }
 
-        public async Task<TokenDto> RefreshAccessToken(TokenDto tokenDto)
+        public async Task<TokenPair> RefreshAccessToken(TokenPair tokenDto)
         {
             ClaimsPrincipal principal;
             

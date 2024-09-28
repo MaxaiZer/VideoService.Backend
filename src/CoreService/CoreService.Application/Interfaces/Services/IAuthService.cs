@@ -9,9 +9,9 @@ namespace CoreService.Application.Interfaces.Services
 
         Task<(IApplicationUser?, bool)> ValidateUser(UserForAuthenticationDto userForAuth);
 
-        public Task<TokenDto> CreateTokens(IApplicationUser user);
-
-        Task<TokenDto> RefreshAccessToken(TokenDto tokenDto);
+        public Task<TokenPair> CreateTokens(IApplicationUser user);
+        
+        Task<TokenPair> RefreshAccessToken(TokenPair tokenDto);
         
         Task RevokeRefreshToken(string userId);
     }

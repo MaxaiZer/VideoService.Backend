@@ -1,8 +1,11 @@
 ﻿using System.Security.Claims;
+using CoreService.Application.Common.Models;
 using CoreService.Application.Dto;
 using CoreService.Application.Interfaces.Services;
+using CoreService.Infrastructure.Jwt;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace CoreService.Api.Controllers
 {  
@@ -11,10 +14,12 @@ namespace CoreService.Api.Controllers
     public class AuthController: ControllerBase
     {
         private readonly IAuthService _authService;
-
-        public AuthController(IAuthService service)
+        private readonly JwtConfiguration _jwtConfig;
+        
+        public AuthController(IAuthService service, IOptions<JwtConfiguration> jwtConfig)
         {
             _authService = service;
+            _jwtConfig = jwtConfig.Value;
         }
 
         /// <summary>
@@ -50,9 +55,11 @@ namespace CoreService.Api.Controllers
             var (user, result) = await _authService.ValidateUser(userDto);
             if (!result)
                 return Unauthorized();
-
-            var tokenDto = await _authService.CreateTokens(user);
-            return Ok(tokenDto);
+            
+            var tokenPair = await _authService.CreateTokens(user);
+            
+            HttpContext.Response.Cookies.Append("refreshToken", tokenPair.RefreshToken, GetRefreshTokenCookieOptions());
+            return Ok(new AccessTokenDto(tokenPair.AccessToken));
         }
         /// <summary>
         /// Refreshes the access token using the provided refresh token.
@@ -62,10 +69,19 @@ namespace CoreService.Api.Controllers
         /// <response code="200">Access token refreshed successfully.</response>
         /// <response code="400">Token refresh failed due to invalid tokens.</response>
         [HttpPost("refresh")]
-        public async Task<IActionResult> Refresh([FromBody] TokenDto tokenDto)
+        public async Task<IActionResult> Refresh([FromBody] AccessTokenDto tokenDto)
         {
-            var tokenDtoToReturn = await _authService.RefreshAccessToken(tokenDto);
-            return Ok(tokenDtoToReturn);
+            var refreshToken = HttpContext.Request.Cookies["refreshToken"];
+            if (string.IsNullOrEmpty(refreshToken))
+            {
+                return BadRequest("Refresh token is missing.");
+            }
+            
+            var tokenPair = new TokenPair(tokenDto.AccessToken, refreshToken);
+            tokenPair = await _authService.RefreshAccessToken(tokenPair);
+            
+            HttpContext.Response.Cookies.Append("refreshToken", tokenPair.RefreshToken, GetRefreshTokenCookieOptions());
+            return Ok(new AccessTokenDto(tokenPair.AccessToken));
         }
         
         /// <summary>
@@ -83,7 +99,19 @@ namespace CoreService.Api.Controllers
                 return Unauthorized("User authentication required.");
             
             await _authService.RevokeRefreshToken(userId);
+            Response.Cookies.Delete("refreshToken");
             return Ok();
+        }
+        
+        private CookieOptions GetRefreshTokenCookieOptions()
+        {
+            return new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddDays(Convert.ToDouble(_jwtConfig.RefreshTokenExpirationDays))
+            };
         }
         
         //Todo: change password with revoking tokens
