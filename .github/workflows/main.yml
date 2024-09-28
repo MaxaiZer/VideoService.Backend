@@ -52,6 +52,20 @@ jobs:
       run: |
         dotnet test VideoService.sln
 
+    - name: Create log directories
+      run: |
+        mkdir -p /home/runner/work/VideoService/VideoService/tests/CoreService.IntegrationTests/bin/Debug/net8.0/logs
+        mkdir -p /home/runner/work/VideoService/VideoService/tests/VideoProcessingService.IntegrationTests/bin/Debug/net8.0/logs
+
+    - name: Upload logs
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: logs
+        path: |
+          /home/runner/work/VideoService/VideoService/tests/CoreService.IntegrationTests/bin/Debug/net8.0/logs/*.txt
+          /home/runner/work/VideoService/VideoService/tests/VideoProcessingService.IntegrationTests/bin/Debug/net8.0/logs/*.txt
+
     - name: Set lowercase docker image prefix
       run: echo "PREFIX_LC=${PREFIX,,}" >> ${GITHUB_ENV}
       env:
