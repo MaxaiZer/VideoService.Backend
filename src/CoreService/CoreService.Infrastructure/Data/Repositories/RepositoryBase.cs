@@ -16,10 +16,11 @@ namespace CoreService.Infrastructure.Data.Repositories
         public IQueryable<T> FindAll(bool trackChanges) =>
             trackChanges ? context.Set<T>() : context.Set<T>().AsNoTracking();
 
-        public async Task<List<T>> FindByConditionAsync(Expression<Func<T, bool>> expression, bool trackChanges) =>
+        public async Task<List<T>> FindByConditionAsync(Expression<Func<T, bool>> expression, bool trackChanges, 
+            CancellationToken cancellationToken = default) =>
             trackChanges 
-                ? await context.Set<T>().Where(expression).ToListAsync() 
-                : await context.Set<T>().Where(expression).AsNoTracking().ToListAsync();
+                ? await context.Set<T>().Where(expression).ToListAsync(cancellationToken) 
+                : await context.Set<T>().Where(expression).AsNoTracking().ToListAsync(cancellationToken);
 
         public void Create(T entity) => context.Set<T>().Add(entity);
         public void Update(T entity) => context.Set<T>().Update(entity);

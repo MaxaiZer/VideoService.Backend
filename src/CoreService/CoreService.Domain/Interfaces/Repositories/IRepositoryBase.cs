@@ -6,7 +6,7 @@ namespace Domain.Interfaces.Repositories
     {
         IQueryable<T> FindAll(bool trackChanges);
         Task<List<T>> FindByConditionAsync(Expression<Func<T, bool>> expression,
-        bool trackChanges);
+        bool trackChanges, CancellationToken cancellationToken = default);
         void Create(T entity);
         void Update(T entity);
         void Delete(T entity);

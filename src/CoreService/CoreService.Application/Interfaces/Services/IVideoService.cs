@@ -7,7 +7,7 @@ namespace CoreService.Application.Interfaces.Services
     {
         public Task AddVideo(VideoUploadDto videoUploadDto);
         
-        public Task<Video?> GetVideoMetadata(string id);
+        public Task<Video?> GetVideoMetadata(string id, CancellationToken cancellationToken = default);
         
         public Task<GeneratedUploadUrlDto> GeneratePresignedUploadLink();
 

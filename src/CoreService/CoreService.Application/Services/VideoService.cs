@@ -58,10 +58,10 @@ namespace CoreService.Application.Services
             }
         }
 
-        public async Task<Video?> GetVideoMetadata(string id)
+        public async Task<Video?> GetVideoMetadata(string id, CancellationToken cancellationToken = default)
         {
-            var list = await _unitOfWork.Videos.FindByConditionAsync(v => v.Id == id && v.Processed,
-                trackChanges: false);
+            var list = await _unitOfWork.Videos.FindByConditionAsync(
+                v => v.Id == id && v.Processed, trackChanges: false, cancellationToken);
             return list.FirstOrDefault();
         }
         

@@ -61,9 +61,9 @@ namespace CoreService.Api.Controllers
         /// <response code="200">Video metadata retrieved successfully.</response>
         /// <response code="400">Video wasn't found.</response>
         [HttpGet("{videoId}")]
-        public async Task<IActionResult> GetMetadata(string videoId)
+        public async Task<IActionResult> GetMetadata(string videoId, CancellationToken cancellationToken)
         {
-            var video = await _videoService.GetVideoMetadata(videoId);
+            var video = await _videoService.GetVideoMetadata(videoId, cancellationToken);
             if (video == null)
                 return BadRequest();
 
