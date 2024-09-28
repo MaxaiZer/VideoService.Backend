@@ -144,32 +144,34 @@ namespace CoreService.UnitTests.ApplicationTests
         public async Task RefreshToken_WhenInvalidUser_ShouldThrowRefreshTokenBadRequest()
         {
             // Arrange
-            var tokenDto = new TokenDto("accessToken", "refreshToken");
+            var tokenDto = new AccessTokenDto("accessToken");
             _jwtServiceMock
                 .Setup(x => x.GetPrincipalFromToken(tokenDto.AccessToken))
                 .Returns(GetValidPrincipal(userId: Guid.NewGuid().ToString()));
             _identityServiceMock
                 .Setup(x => x.GetUserByNameAsync(It.IsAny<string>()))
                 .ReturnsAsync((IApplicationUser?)null);
-
+            var tokenPair = new TokenPair(tokenDto.AccessToken, "refreshToken");
+            
             // Act & Assert
-            await Assert.ThrowsAsync<RefreshTokenBadRequest>(() => _authService.RefreshAccessToken(tokenDto));
+            await Assert.ThrowsAsync<RefreshTokenBadRequest>(() => _authService.RefreshAccessToken(tokenPair));
         }
         
         [Fact]
         public async Task RefreshToken_WhenInvalidToken_ShouldThrowRefreshTokenBadRequest()
         {
             // Arrange
-            var tokenDto = new TokenDto("accessToken", "refreshToken");
+            var tokenDto = new AccessTokenDto("accessToken");
             _jwtServiceMock
                 .Setup(x => x.GetPrincipalFromToken(tokenDto.AccessToken))
                 .Throws(new Exception());
             _identityServiceMock
                 .Setup(x => x.GetUserByNameAsync(It.IsAny<string>()))
                 .ReturnsAsync((IApplicationUser?)null);
+            var tokenPair = new TokenPair(tokenDto.AccessToken, "refreshToken");
 
             // Act & Assert
-            await Assert.ThrowsAsync<RefreshTokenBadRequest>(() => _authService.RefreshAccessToken(tokenDto));
+            await Assert.ThrowsAsync<RefreshTokenBadRequest>(() => _authService.RefreshAccessToken(tokenPair));
         }
 
         [Fact]
@@ -177,9 +179,8 @@ namespace CoreService.UnitTests.ApplicationTests
         {
             // Arrange
             var refreshToken = "refreshToken";
-            var tokenDto = new TokenDto("accessToken", refreshToken);
+            var tokenDto = new AccessTokenDto("accessToken");
             var user = new ApplicationUser { Id = Guid.NewGuid().ToString(), RefreshToken = refreshToken, RefreshTokenExpiryTime = DateTimeOffset.Now.AddDays(1) };
-           // var user = new Mock<IApplicationUser>();
             var newAccessToken = "newAccessToken";
 
             _jwtServiceMock
@@ -192,7 +193,7 @@ namespace CoreService.UnitTests.ApplicationTests
             _identityServiceMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(Result.Success);
 
             // Act
-            var newTokenDto = await _authService.RefreshAccessToken(tokenDto);
+            var newTokenDto = await _authService.RefreshAccessToken(new TokenPair(tokenDto.AccessToken, refreshToken));
 
             // Assert
             newTokenDto.AccessToken.Should().Be(newAccessToken);

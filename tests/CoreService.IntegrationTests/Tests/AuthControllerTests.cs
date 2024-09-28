@@ -72,10 +72,11 @@ public class AuthControllerTests: IClassFixture<TestingWebAppFactory>
             
             response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
             
-            var tokenDto = await response.Content.ReadFromJsonAsync<TokenDto>();
+            var tokenDto = await response.Content.ReadFromJsonAsync<AccessTokenDto>();
             tokenDto.Should().NotBeNull();
             tokenDto.AccessToken.Should().NotBeNullOrEmpty();
-            tokenDto.RefreshToken.Should().NotBeNullOrEmpty();
+
+            GetRefreshTokenFromCookie(response);
         }
 
         [Fact]
@@ -95,22 +96,25 @@ public class AuthControllerTests: IClassFixture<TestingWebAppFactory>
         [Fact]
         public async Task Refresh_WhenValidTokens_ShouldReturn200AndNewTokens()
         {
-            var tokenDto = new TokenDto(AccessToken: DatabaseSeeder.existingUsersWithActiveTokens[1].AccessToken, RefreshToken: DatabaseSeeder.existingUsersWithActiveTokens[1].RefreshToken);
+            var tokenDto = new AccessTokenDto(AccessToken: DatabaseSeeder.existingUsersWithActiveTokens[1].AccessToken);
+            _client.DefaultRequestHeaders.Add("Cookie", $"refreshToken={DatabaseSeeder.existingUsersWithActiveTokens[1].RefreshToken}");
             
             var response = await _client.PostAsJsonAsync(_baseUrl + "/refresh", tokenDto);
             
             response.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
             
-            var newTokenDto = await response.Content.ReadFromJsonAsync<TokenDto>();
+            var newTokenDto = await response.Content.ReadFromJsonAsync<AccessTokenDto>();
             newTokenDto.Should().NotBeNull();
             newTokenDto.AccessToken.Should().NotBeNullOrEmpty();
-            newTokenDto.RefreshToken.Should().NotBeNullOrEmpty();
+            
+            GetRefreshTokenFromCookie(response);
         }
 
         [Fact]
         public async Task Refresh_WhenInvalidTokens_ShouldReturn400()
         {
-            var tokenDto = new TokenDto(AccessToken: "invalidToken", RefreshToken: "refreshToken");
+            var tokenDto = new AccessTokenDto(AccessToken: "invalidToken");
+            _client.DefaultRequestHeaders.Add("Cookie", "refreshToken=refreshToken");
             
             var response = await _client.PostAsJsonAsync(_baseUrl + "/refresh", tokenDto);
             
@@ -120,7 +124,18 @@ public class AuthControllerTests: IClassFixture<TestingWebAppFactory>
         [Fact]
         public async Task Refresh_WhenExpiredToken_ShouldReturn400()
         {
-            var tokenDto = new TokenDto(AccessToken: DatabaseSeeder.existingUserWithExpiredToken.AccessToken, RefreshToken: DatabaseSeeder.existingUserWithExpiredToken.RefreshToken);
+            var tokenDto = new AccessTokenDto(AccessToken: DatabaseSeeder.existingUserWithExpiredToken.AccessToken);
+            _client.DefaultRequestHeaders.Add("Cookie", $"refreshToken={DatabaseSeeder.existingUserWithExpiredToken.RefreshToken}");
+            
+            var response = await _client.PostAsJsonAsync(_baseUrl + "/refresh", tokenDto);
+            
+            response.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);
+        }
+        
+        [Fact]
+        public async Task Refresh_WhenMissingRefreshToken_ShouldReturn400()
+        {
+            var tokenDto = new AccessTokenDto(AccessToken: DatabaseSeeder.existingUserWithExpiredToken.AccessToken);
             
             var response = await _client.PostAsJsonAsync(_baseUrl + "/refresh", tokenDto);
             
@@ -132,14 +147,23 @@ public class AuthControllerTests: IClassFixture<TestingWebAppFactory>
         {
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", DatabaseSeeder.existingUserForTokenRevoke.AccessToken);
             
-            var tokenDto = new TokenDto(AccessToken: DatabaseSeeder.existingUserForTokenRevoke.AccessToken, RefreshToken: DatabaseSeeder.existingUserForTokenRevoke.RefreshToken);
+            var tokenDto = new AccessTokenDto(AccessToken: DatabaseSeeder.existingUserForTokenRevoke.AccessToken);
+            _client.DefaultRequestHeaders.Add("Cookie", $"refreshToken={DatabaseSeeder.existingUserForTokenRevoke.RefreshToken}");
             
             var response1 = await _client.PostAsync(_baseUrl + "/revoke", null);
             var response2 = await _client.PostAsJsonAsync(_baseUrl + "/refresh", tokenDto);
-
-            _client.DefaultRequestHeaders.Authorization = null;
             
             response1.StatusCode.Should().Be(System.Net.HttpStatusCode.OK);
             response2.StatusCode.Should().Be(System.Net.HttpStatusCode.BadRequest);
+        }
+
+        private string GetRefreshTokenFromCookie(HttpResponseMessage response)
+        {
+            response.Headers.TryGetValues("Set-Cookie", out var cookies);
+            cookies.Should().ContainSingle();
+            var refreshTokenCookie = cookies.First().Split(';').First();
+            refreshTokenCookie.Should().StartWith("refreshToken=");
+
+            return refreshTokenCookie;
         }
 }
