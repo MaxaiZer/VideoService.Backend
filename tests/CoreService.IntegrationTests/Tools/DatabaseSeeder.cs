@@ -43,8 +43,13 @@ public class DatabaseSeeder
 
         var userId = Guid.NewGuid().ToString();
 
-        var testUser = new TestUserData(Name: name, Password: password, RefreshToken: token.RefreshToken,
-            RefreshTokenExpiryTime: token.ExpiryTime.ToUniversalTime(), AccessToken: _jwtService.CreateAccessToken([new Claim(ClaimTypes.NameIdentifier, userId)]));
+        var testUser = new TestUserData(
+            Name: name, 
+            Password: password, 
+            RefreshToken: token.RefreshToken,
+            RefreshTokenExpiryTime: token.ExpiryTime.ToUniversalTime(), 
+            AccessToken: _jwtService.CreateAccessToken([new Claim(ClaimTypes.NameIdentifier, userId)])
+            );
         
         var user = new ApplicationUser
         {
