@@ -2,6 +2,8 @@
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
 using Npgsql;
 using Polly;
 
@@ -41,7 +43,7 @@ namespace CoreService.IntegrationTests.Tools
             var port = int.Parse(connectionStringBuilder["Port"].ToString());
             var user = connectionStringBuilder["User Id"].ToString();
             var password = connectionStringBuilder["Password"].ToString();
-
+            
             _containers.Add(new ContainerBuilder()
                 .WithImage("postgres:latest")
                 .WithEnvironment("POSTGRES_DB", dbName)
@@ -111,8 +113,17 @@ namespace CoreService.IntegrationTests.Tools
 
         public async Task DisposeAsync()
         {
+            
+            var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder.AddNLog();
+            });
+
+            var logger = loggerFactory.CreateLogger<EnvironmentFixture>();
+            
             foreach (var container in _containers)
             {
+                logger.LogInformation((await container.GetLogsAsync()).ToString());
                 await container.StopAsync();
                 await container.DisposeAsync();
             }
