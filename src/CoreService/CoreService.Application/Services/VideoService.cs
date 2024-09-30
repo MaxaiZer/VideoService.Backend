@@ -58,17 +58,15 @@ namespace CoreService.Application.Services
             }
         }
 
-        public async Task<Video?> GetVideoMetadata(string id, CancellationToken cancellationToken = default)
+        public async Task<ViewableVideoMetadata?> GetVideoMetadata(string id, CancellationToken cancellationToken = default)
         {
-            var list = await _unitOfWork.Videos.FindByConditionAsync(
-                v => v.Id == id && v.Processed, trackChanges: false, cancellationToken);
-            return list.FirstOrDefault();
+            return await _unitOfWork.Videos.FindViewableByIdAsync(id, cancellationToken);
         }
 
-        public async Task<List<Video>> GetVideosMetadata(VideoParameters parameters,
+        public async Task<List<ViewableVideoMetadata>> GetVideosMetadata(VideoParameters parameters,
             CancellationToken cancellationToken = default)
         {
-            return await _unitOfWork.Videos.FindAsync(parameters.SearchQuery, parameters.PageNumber,
+            return await _unitOfWork.Videos.FindViewableAsync(parameters.SearchQuery, parameters.PageNumber,
                 parameters.PageSize, cancellationToken);
         }
         

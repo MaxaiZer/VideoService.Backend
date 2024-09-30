@@ -4,7 +4,8 @@ namespace Domain.Interfaces.Repositories
 {
     public interface IVideoRepository: IRepositoryBase<Video>
     {
-        Task<List<Video>> FindAsync(string searchQuery, int pageNumber, int pageSize, 
+        Task<ViewableVideoMetadata?> FindViewableByIdAsync(string id, CancellationToken cancellationToken = default);
+        Task<List<ViewableVideoMetadata>> FindViewableAsync(string searchQuery, int pageNumber, int pageSize, 
             CancellationToken cancellationToken = default);
     }
 }
