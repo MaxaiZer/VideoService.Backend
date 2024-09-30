@@ -20,7 +20,8 @@ public class JwtServiceTests
             ValidIssuer = "TestIssuer",
             ValidAudience = "TestAudience",
             AccessTokenExpirationMinutes = "15",
-            RefreshTokenExpirationDays = "7"
+            RefreshTokenExpirationDays = "7",
+            Secret = "super_secret_test_key_for_unit_tests"
         };
       
         var optionsMock = new Mock<IOptions<JwtConfiguration>>();
