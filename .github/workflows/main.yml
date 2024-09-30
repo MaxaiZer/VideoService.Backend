@@ -66,13 +66,22 @@ jobs:
           /home/runner/work/VideoService/VideoService/tests/CoreService.IntegrationTests/bin/Debug/net8.0/logs/*.txt
           /home/runner/work/VideoService/VideoService/tests/VideoProcessingService.IntegrationTests/bin/Debug/net8.0/logs/*.txt
 
+    - name: Detect paths of changed files
+      uses: dorny/paths-filter@v3
+      id: changes
+      with:
+        filters: |
+          src:
+            - 'src/**'
+
     - name: Set lowercase docker image prefix
+      if: success()
       run: echo "PREFIX_LC=${PREFIX,,}" >> ${GITHUB_ENV}
       env:
         PREFIX: '${{ github.repository_owner }}'
 
-    - name: Build CoreService docker image
-      if: success()
+    - name: Build and push CoreService docker image
+      if: success() && steps.changes.outputs.src == 'true'
       id: build_core_image
       uses: docker/build-push-action@v6
       with:
@@ -81,8 +90,8 @@ jobs:
         tags: ghcr.io/${{ env.PREFIX_LC }}/video-core-service:latest
         push: true
 
-    - name: Build VideoProcessingService docker image
-      if: success()
+    - name: Build and push VideoProcessingService docker image
+      if: success() && steps.changes.outputs.src == 'true'
       id: build_vps_image
       uses: docker/build-push-action@v6
       with:
