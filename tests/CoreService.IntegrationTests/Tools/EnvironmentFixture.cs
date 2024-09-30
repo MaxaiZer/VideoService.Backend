@@ -17,6 +17,7 @@ namespace CoreService.IntegrationTests.Tools
     public class EnvironmentFixture : IAsyncLifetime
     {
         private readonly List<IContainer> _containers = [];
+        private readonly ILogger _logger;
         private string _postgresConnectionString;
 
         public EnvironmentFixture()
@@ -25,8 +26,13 @@ namespace CoreService.IntegrationTests.Tools
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile("appsettings.Integration.json", optional: false, reloadOnChange: true);
-
             var configuration = builder.Build();
+            
+            var loggerFactory = LoggerFactory.Create(builder =>
+            {
+                builder.AddNLog();
+            });
+            _logger = loggerFactory.CreateLogger<EnvironmentFixture>();
 
             CreatePostgresContainer(configuration);
             CreateMinioContainer(configuration);
@@ -51,6 +57,7 @@ namespace CoreService.IntegrationTests.Tools
                 .WithEnvironment("POSTGRES_PASSWORD", password)
                 .WithPortBinding(port)
                 .WithCleanUp(true)
+                .WithLogger(_logger)
                 .Build()
             );
         }
@@ -78,6 +85,7 @@ namespace CoreService.IntegrationTests.Tools
                 .WithPortBinding(9001)
                 .WithResourceMapping(scriptSourcePath, "/usr/local/bin")
                 .WithCleanUp(true)
+                .WithLogger(_logger)
                 .Build()
             );
         }
@@ -113,17 +121,13 @@ namespace CoreService.IntegrationTests.Tools
 
         public async Task DisposeAsync()
         {
-            
-            var loggerFactory = LoggerFactory.Create(builder =>
-            {
-                builder.AddNLog();
-            });
-
-            var logger = loggerFactory.CreateLogger<EnvironmentFixture>();
-            
             foreach (var container in _containers)
             {
-                logger.LogInformation((await container.GetLogsAsync()).ToString());
+                var (stdout, stderr) = await container.GetLogsAsync();
+
+                _logger.LogInformation(stdout);
+                _logger.LogError(stderr);
+                
                 await container.StopAsync();
                 await container.DisposeAsync();
             }
