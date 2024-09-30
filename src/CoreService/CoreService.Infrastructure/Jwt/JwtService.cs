@@ -42,7 +42,7 @@ public class JwtService : IJwtService
     public ClaimsPrincipal GetPrincipalFromToken(string token)
     {
         var f = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(_config.SecretKey));
+            Encoding.UTF8.GetBytes(_config.Secret));
         
         var tokenValidationParameters = new TokenValidationParameters
         {
@@ -81,7 +81,7 @@ public class JwtService : IJwtService
     
     private SigningCredentials GetSigningCredentials()
     {
-        var key = Encoding.UTF8.GetBytes(_config.SecretKey);
+        var key = Encoding.UTF8.GetBytes(_config.Secret);
         var secret = new SymmetricSecurityKey(key);
         return new SigningCredentials(secret, _securityAlgorithm);
     }

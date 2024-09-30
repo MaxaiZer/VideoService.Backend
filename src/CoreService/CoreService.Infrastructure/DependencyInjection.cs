@@ -173,7 +173,7 @@ public static class DependencyInjection
                     ValidIssuer = jwtConfig.ValidIssuer,
                     ValidAudience = jwtConfig.ValidAudience,
                     IssuerSigningKey = new
-                        SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.SecretKey))
+                        SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.Secret))
                 };
             });
         
