@@ -64,6 +64,13 @@ namespace CoreService.Application.Services
                 v => v.Id == id && v.Processed, trackChanges: false, cancellationToken);
             return list.FirstOrDefault();
         }
+
+        public async Task<List<Video>> GetVideosMetadata(VideoParameters parameters,
+            CancellationToken cancellationToken = default)
+        {
+            return await _unitOfWork.Videos.FindAsync(parameters.SearchQuery, parameters.PageNumber,
+                parameters.PageSize, cancellationToken);
+        }
         
         public async Task<GeneratedUploadUrlDto> GetUploadUrl()
         {

@@ -12,6 +12,9 @@ namespace Infrastructure.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.Sql("CREATE EXTENSION IF NOT EXISTS pg_trgm;");
+            migrationBuilder.Sql("CREATE EXTENSION IF NOT EXISTS btree_gin;");
+            
             migrationBuilder.CreateTable(
                 name: "AspNetRoles",
                 columns: table => new
@@ -225,6 +228,14 @@ namespace Infrastructure.Data.Migrations
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Videos_Name",
+                table: "Videos",
+                column: "Name",
+                filter: "\"Processed\" = true")
+                .Annotation("Npgsql:IndexMethod", "gin")
+                .Annotation("Npgsql:IndexOperators", new[] { "gin_trgm_ops" });
         }
 
         /// <inheritdoc />

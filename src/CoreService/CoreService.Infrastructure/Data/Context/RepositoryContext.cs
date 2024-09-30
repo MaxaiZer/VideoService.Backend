@@ -25,6 +25,12 @@ namespace CoreService.Infrastructure.Data.Context
                         Enum.Parse(typeof(VideoProcessingRequest.ProcessingStatus), v)
                 );
             
+           builder.Entity<Video>()
+                .HasIndex(v => v.Name)
+                .HasFilter($"\"{nameof(Video.Processed)}\" = true")
+                .HasMethod("gin")
+                .HasOperators("gin_trgm_ops");
+            
             base.OnModelCreating(builder);
         }
     }

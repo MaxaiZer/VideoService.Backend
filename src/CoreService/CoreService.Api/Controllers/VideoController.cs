@@ -52,6 +52,23 @@ namespace CoreService.Api.Controllers
             await _videoService.AddVideo(videoUploadDto);
             return Ok();
         }
+
+        /// <summary>
+        /// Retrieves a videos metadata.
+        /// </summary>
+        /// <param name="parameters">Search parameters</param>
+        /// <returns>HTTP 200 status code with video metadata if the video exists.</returns>
+        /// <response code="200">Videos metadata retrieved successfully.</response>
+        /// <response code="400">Videos wasn't found.</response>
+        public async Task<IActionResult> GetMetadata([FromQuery]VideoParameters parameters, CancellationToken cancellationToken)
+        {
+            //todo: do not return domain entity
+            var video = await _videoService.GetVideosMetadata(parameters, cancellationToken);
+            if (video == null)
+                return BadRequest();
+
+            return Ok(video);
+        }
         
         /// <summary>
         /// Retrieves a video metadata.
@@ -63,6 +80,7 @@ namespace CoreService.Api.Controllers
         [HttpGet("{videoId}")]
         public async Task<IActionResult> GetMetadata(string videoId, CancellationToken cancellationToken)
         {
+            //todo: do not return domain entity
             var video = await _videoService.GetVideoMetadata(videoId, cancellationToken);
             if (video == null)
                 return BadRequest();
