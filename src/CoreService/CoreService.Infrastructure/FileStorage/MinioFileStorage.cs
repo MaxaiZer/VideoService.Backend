@@ -40,7 +40,7 @@ namespace CoreService.Infrastructure.FileStorage
             return stream;
         }
 
-        public async Task<string> GeneratePresignedPutUrl(string fileName)
+        public async Task<string> GeneratePutUrlForTempFile(string fileName)
         {
             var args = new PresignedPutObjectArgs()
                 .WithObject("tmp/" + fileName)

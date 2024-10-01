@@ -4,6 +4,6 @@
     {
         public Task<Stream> GetFileAsync(string name, bool isTemporary = false);
         
-        public Task<string> GeneratePresignedPutUrl(string fileName);
+        public Task<string> GeneratePutUrlForTempFile(string fileName);
     }
 }

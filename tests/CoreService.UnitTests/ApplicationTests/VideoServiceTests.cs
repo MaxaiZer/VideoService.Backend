@@ -73,7 +73,7 @@ namespace CoreService.UnitTests.ApplicationTests
         public async Task GetUploadUrl_WhenCalled_ShouldReturnUrlAndFileName()
         {
             var expectedUrl = "http://example.com";
-            _mockFileStorage.Setup(fs => fs.GeneratePresignedPutUrl(It.IsAny<string>())).ReturnsAsync(expectedUrl);
+            _mockFileStorage.Setup(fs => fs.GeneratePutUrlForTempFile(It.IsAny<string>())).ReturnsAsync(expectedUrl);
 
             var result = await _videoService.GetUploadUrl();
 

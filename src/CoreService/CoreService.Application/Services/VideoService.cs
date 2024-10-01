@@ -77,7 +77,7 @@ namespace CoreService.Application.Services
 
             try
             {
-                url = await _fileStorage.GeneratePresignedPutUrl(fileName);
+                url = await _fileStorage.GeneratePutUrlForTempFile(fileName);
             }
             catch (Exception ex)
             {
