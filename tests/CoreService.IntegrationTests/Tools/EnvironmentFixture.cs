@@ -73,6 +73,7 @@ namespace CoreService.IntegrationTests.Tools
             var accessKey = configuration.GetSection("MinIO")["AccessKey"] ?? throw new Exception("AccessKey is null");
             var secretKey = configuration.GetSection("MinIO")["SecretKey"] ?? throw new Exception("SecretKey is null");
             var bucketName = configuration.GetSection("MinIO")["BucketName"] ?? throw new Exception("BucketName is null");
+            var tmpFolder = configuration.GetSection("MinIO")["TmpFolder"] ?? throw new Exception("TmpFolder is null");
             
             _containers.Add(new ContainerBuilder()
                 .WithImage("minio/minio:latest")
@@ -80,7 +81,8 @@ namespace CoreService.IntegrationTests.Tools
                 .WithCommand("server", "--console-address", ":9001", "/data")
                 .WithEnvironment("MINIO_ROOT_USER", accessKey)
                 .WithEnvironment("MINIO_ROOT_PASSWORD", secretKey)
-                .WithEnvironment("BUCKET_NAME",bucketName)
+                .WithEnvironment("BUCKET_NAME", bucketName)
+                .WithEnvironment("TMP_FOLDER", tmpFolder)
                 .WithPortBinding(9000)
                 .WithPortBinding(9001)
                 .WithResourceMapping(scriptSourcePath, "/usr/local/bin")

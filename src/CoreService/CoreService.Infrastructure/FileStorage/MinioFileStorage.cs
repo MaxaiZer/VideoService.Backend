@@ -23,7 +23,7 @@ namespace CoreService.Infrastructure.FileStorage
             Stream stream = new MemoryStream();
 
             var args = new GetObjectArgs()
-                .WithObject((isTemporary ? "tmp/" : "") + name)
+                .WithObject((isTemporary ? $"{_config.TmpFolder}/" : "") + name)
                 .WithBucket(_config.BucketName)
                 .WithCallbackStream(async (str, cancellationToken) => 
                     await str.CopyToAsync(stream, cancellationToken));
@@ -43,7 +43,7 @@ namespace CoreService.Infrastructure.FileStorage
         public async Task<string> GeneratePutUrlForTempFile(string fileName)
         {
             var args = new PresignedPutObjectArgs()
-                .WithObject("tmp/" + fileName)
+                .WithObject($"{_config.TmpFolder}/" + fileName)
                 .WithBucket(_config.BucketName)
                 .WithExpiry(60 * 60 * 12);
 

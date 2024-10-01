@@ -23,7 +23,7 @@ namespace VideoProcessingService.Infrastructure.FileStorage
             Stream stream = new MemoryStream();
 
             var args = new GetObjectArgs()
-                .WithObject((isTemporary ? "tmp/" : "") + name)
+                .WithObject((isTemporary ? $"{_config.TmpFolder}/" : "") + name)
                 .WithBucket(_config.BucketName)
                 .WithCallbackStream(async (str, cancellationToken) => 
                     await str.CopyToAsync(stream, cancellationToken));

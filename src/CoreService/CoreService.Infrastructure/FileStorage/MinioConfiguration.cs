@@ -5,7 +5,7 @@ namespace CoreService.Infrastructure.FileStorage;
 public class MinioConfiguration
 {
     [Required]
-    public static  string Section => "MinIO";
+    public static string Section => "MinIO";
     [Required]
     public string Endpoint { get; set; }
     [Required]
@@ -16,4 +16,6 @@ public class MinioConfiguration
     public string SecretKey { get; set; }
     [Required]
     public string BucketName { get; set; }
+    [Required] 
+    public string TmpFolder { get; set; }
 }

@@ -20,8 +20,8 @@ fi
 if [ -n "$(/usr/bin/mc ilm ls myminio/"$BUCKET_NAME" 2>/dev/null)" ]; then
     echo "ILM rule for prefix 'tmp/' already exists."
 else
-    if ! /usr/bin/mc ilm add --expiry-days 3 --prefix "tmp/" myminio/"$BUCKET_NAME"; then
-        echo "Error: Unable to add ILM rule for prefix 'tmp/'."
+    if ! /usr/bin/mc ilm add --expiry-days 3 --prefix "$TMP_FOLDER/" myminio/"$BUCKET_NAME"; then
+        echo "Error: Unable to add ILM rule for prefix '$TMP_FOLDER/'."
         exit 1
     fi
 fi
