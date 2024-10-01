@@ -3,6 +3,8 @@
 minio server --console-address ":9001" /data &
 echo "MinIO server was started"
 
+sleep 3;
+
 until mc ready local; do
     echo "Waiting for MinIO server to be ready..."
     sleep 5
