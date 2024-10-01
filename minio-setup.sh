@@ -3,7 +3,7 @@
 minio server --console-address ":9001" /data &
 echo "MinIO server was started"
 
-until curl -s http://127.0.0.1:9000/minio/health/live; do
+until mc ready local; do
     echo "Waiting for MinIO server to be ready..."
     sleep 5
 done
