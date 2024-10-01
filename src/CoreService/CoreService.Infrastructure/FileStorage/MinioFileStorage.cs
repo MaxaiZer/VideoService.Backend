@@ -18,16 +18,16 @@ namespace CoreService.Infrastructure.FileStorage
             _config = minioConfiguration.Value;
         }
 
-        public async Task<Stream> GetFileAsync(string name)
+        public async Task<Stream> GetFileAsync(string name, bool isTemporary = false)
         {
             Stream stream = new MemoryStream();
 
             var args = new GetObjectArgs()
-                .WithObject(name)
+                .WithObject((isTemporary ? "tmp/" : "") + name)
                 .WithBucket(_config.BucketName)
                 .WithCallbackStream(async (str, cancellationToken) => 
                     await str.CopyToAsync(stream, cancellationToken));
-
+            
             try
             {
                 await _client.GetObjectAsync(args);
@@ -77,7 +77,7 @@ namespace CoreService.Infrastructure.FileStorage
         public async Task<string> GeneratePresignedPutUrl(string fileName)
         {
             var args = new PresignedPutObjectArgs()
-                .WithObject(fileName)
+                .WithObject("tmp/" + fileName)
                 .WithBucket(_config.BucketName)
                 .WithExpiry(60 * 60 * 12);
 

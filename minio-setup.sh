@@ -12,11 +12,18 @@ done
 
 /usr/bin/mc alias set myminio http://127.0.0.1:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD";
 
-if /usr/bin/mc mb myminio/"$BUCKET_NAME" --ignore-existing; then
-    echo "Bucket '$BUCKET_NAME' created successfully."
-  else
+if ! /usr/bin/mc mb myminio/"$BUCKET_NAME" --ignore-existing; then
     echo "Error: Unable to create bucket '$BUCKET_NAME'."
     exit 1
+fi
+
+if [ -n "$(/usr/bin/mc ilm ls myminio/"$BUCKET_NAME" 2>/dev/null)" ]; then
+    echo "ILM rule for prefix 'tmp/' already exists."
+else
+    if ! /usr/bin/mc ilm add --expiry-days 3 --prefix "tmp/" myminio/"$BUCKET_NAME"; then
+        echo "Error: Unable to add ILM rule for prefix 'tmp/'."
+        exit 1
+    fi
 fi
 
 wait

@@ -88,7 +88,7 @@ namespace CoreService.UnitTests.ApplicationTests
             var fileName = "playlist.m3u8";
             var expectedName = StorageFileNamingHelper.GetNameForVideoSubFile(videoId.ToString(), fileName);
             var expectedStream = new MemoryStream();
-            _mockFileStorage.Setup(fs => fs.GetFileAsync(expectedName)).ReturnsAsync(expectedStream);
+            _mockFileStorage.Setup(fs => fs.GetFileAsync(expectedName, false)).ReturnsAsync(expectedStream);
 
             var result = await _videoService.GetSubFile(videoId, fileName);
 
@@ -103,7 +103,7 @@ namespace CoreService.UnitTests.ApplicationTests
             var expectedName = StorageFileNamingHelper.GetNameForVideoSubFile(videoId.ToString(), fileName);
             
             var exceptionMessage = "File not found";
-            _mockFileStorage.Setup(fs => fs.GetFileAsync(expectedName)).ThrowsAsync(new Exception(exceptionMessage));
+            _mockFileStorage.Setup(fs => fs.GetFileAsync(expectedName, false)).ThrowsAsync(new Exception(exceptionMessage));
 
             var exception = await Assert.ThrowsAsync<Exception>(() => _videoService.GetSubFile(videoId, fileName));
 

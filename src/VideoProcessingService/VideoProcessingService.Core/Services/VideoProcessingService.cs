@@ -41,7 +41,7 @@ namespace VideoProcessingService.Core.Services
 
             try
             {
-                await using (var inputStream = await _fileStorage.GetFileAsync(videoId))
+                await using (var inputStream = await _fileStorage.GetFileAsync(videoId, isTemporary: true))
                 {
                     await using var fileStream = new FileStream(inputFilePath, FileMode.Create, FileAccess.Write);
                     inputStream.Position = 0;

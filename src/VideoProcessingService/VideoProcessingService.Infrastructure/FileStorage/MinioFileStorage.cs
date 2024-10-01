@@ -18,12 +18,12 @@ namespace VideoProcessingService.Infrastructure.FileStorage
             _config = minioConfiguration.Value;
         }
 
-        public async Task<Stream> GetFileAsync(string name)
+        public async Task<Stream> GetFileAsync(string name, bool isTemporary = false)
         {
             Stream stream = new MemoryStream();
 
             var args = new GetObjectArgs()
-                .WithObject(name)
+                .WithObject((isTemporary ? "tmp/" : "") + name)
                 .WithBucket(_config.BucketName)
                 .WithCallbackStream(async (str, cancellationToken) => 
                     await str.CopyToAsync(stream, cancellationToken));

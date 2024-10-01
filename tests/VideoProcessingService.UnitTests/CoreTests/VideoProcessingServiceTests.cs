@@ -50,7 +50,7 @@ namespace VideoProcessingService.UnitTests.CoreTests
             
             _mockVideoConverter.Setup(vc => vc.ConvertToHlsAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(conversionResult);
-            _mockFileStorage.Setup(fs => fs.GetFileAsync(videoId)).ReturnsAsync(new MemoryStream());
+            _mockFileStorage.Setup(fs => fs.GetFileAsync(videoId, true)).ReturnsAsync(new MemoryStream());
             _mockFileStorage.Setup(fs => fs.PutFileAsync(It.IsAny<string>(), It.IsAny<Stream>())).Returns(Task.CompletedTask);
             _mockUnitOfWork.Setup(x => x.VideoProcessingRequests.GetById(requestId)).ReturnsAsync(request);
             _mockUnitOfWork.Setup(x => x.VideoProcessingRequests.UpdateStatus(requestId, 
@@ -100,7 +100,7 @@ namespace VideoProcessingService.UnitTests.CoreTests
         {
             SetupSuccessfulVideoProcessingTest(out var message, out var request, out _);
             var exceptionMessage = "File not found";
-            _mockFileStorage.Setup(fs => fs.GetFileAsync(request.VideoId)).ThrowsAsync(new Exception(exceptionMessage));
+            _mockFileStorage.Setup(fs => fs.GetFileAsync(request.VideoId, true)).ThrowsAsync(new Exception(exceptionMessage));
 
             await _videoProcessingService.Invoking(v => v.ProcessAndStoreVideoAsync(message))
                 .Should().ThrowAsync<Exception>();
@@ -112,7 +112,7 @@ namespace VideoProcessingService.UnitTests.CoreTests
         {
             SetupSuccessfulVideoProcessingTest(out var message, out var request, out _);
             var exceptionMessage = "File not found";
-            _mockFileStorage.Setup(fs => fs.GetFileAsync(request.VideoId)).ThrowsAsync(new Exception(exceptionMessage));
+            _mockFileStorage.Setup(fs => fs.GetFileAsync(request.VideoId, true)).ThrowsAsync(new Exception(exceptionMessage));
 
             var exception = await Assert.ThrowsAsync<Exception>(() => _videoProcessingService.ProcessAndStoreVideoAsync(message));
             
