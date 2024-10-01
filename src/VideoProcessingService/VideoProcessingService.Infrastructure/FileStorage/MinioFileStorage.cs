@@ -40,38 +40,6 @@ namespace VideoProcessingService.Infrastructure.FileStorage
             return stream;
         }
 
-        public async Task<Stream> GetFileAsync(string name, long offset, long length)
-        {
-            Stream stream = new MemoryStream();
-
-            var args = new GetObjectArgs()
-                .WithObject(name)
-                .WithBucket(_config.BucketName)
-                .WithOffsetAndLength(offset, length)
-                .WithCallbackStream((str) =>
-                {
-                    str.CopyToAsync(stream);
-                });
-
-            try
-            {
-                await _client.GetObjectAsync(args);
-            } catch (ObjectNotFoundException ex)
-            {
-                throw new NotFoundException(ex.Message);
-            }
-            return stream;
-        }
-
-        public async Task GetFileMetadata(string name)
-        {
-            var args = new StatObjectArgs()
-                .WithObject(name)
-                .WithBucket(_config.BucketName);
-
-            Minio.DataModel.ObjectStat stat = await _client.StatObjectAsync(args);
-        }
-
         public async Task PutFileAsync(string name, Stream stream)
         {
             var args = new PutObjectArgs()
@@ -81,19 +49,6 @@ namespace VideoProcessingService.Infrastructure.FileStorage
                 .WithObjectSize(stream.Length);
 
             await _client.PutObjectAsync(args);
-        }
-
-        public async Task<string> GeneratePresignedPutUrl(string fileName)
-        {
-            var args = new PresignedPutObjectArgs()
-                .WithObject(fileName)
-                .WithBucket(_config.BucketName)
-                .WithExpiry(60 * 60 * 12);
-
-            var url = await _client.PresignedPutObjectAsync(args);
-            return url.Replace(_config.Endpoint, _config.PublicHost);
-
-          //return url;
         }
     }
 }

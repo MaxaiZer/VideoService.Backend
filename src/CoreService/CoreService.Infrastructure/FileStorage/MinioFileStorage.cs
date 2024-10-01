@@ -40,40 +40,6 @@ namespace CoreService.Infrastructure.FileStorage
             return stream;
         }
 
-        public async Task<Stream> GetFileAsync(string name, long offset, long length)
-        {
-            Stream stream = new MemoryStream();
-
-            var args = new GetObjectArgs()
-                .WithObject(name)
-                .WithBucket(_config.BucketName)
-                .WithOffsetAndLength(offset, length)
-                .WithCallbackStream((str) =>
-                {
-                    str.CopyToAsync(stream);
-                });
-
-            try
-            {
-                await _client.GetObjectAsync(args);
-            } catch (ObjectNotFoundException ex)
-            {
-                throw new NotFoundException(ex.Message);
-            }
-            return stream;
-        }
-
-        public async Task PutFileAsync(string name, Stream stream)
-        {
-            var args = new PutObjectArgs()
-                .WithObject(name)
-                .WithBucket(_config.BucketName)
-                .WithStreamData(stream)
-                .WithObjectSize(stream.Length);
-
-            await _client.PutObjectAsync(args);
-        }
-
         public async Task<string> GeneratePresignedPutUrl(string fileName)
         {
             var args = new PresignedPutObjectArgs()
