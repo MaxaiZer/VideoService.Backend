@@ -7,11 +7,11 @@ using Minio;
 using NLog;
 using Shared.Messages;
 using VideoProcessingService.Core.Interfaces;
-using VideoProcessingService.Infrastructure.Broker;
-using VideoProcessingService.Infrastructure.Consumers;
 using VideoProcessingService.Infrastructure.Converters;
 using VideoProcessingService.Infrastructure.Data;
 using VideoProcessingService.Infrastructure.Logging;
+using VideoProcessingService.Infrastructure.Messaging.Configuration;
+using VideoProcessingService.Infrastructure.Messaging.Consumers;
 
 namespace VideoProcessingService.Infrastructure;
 

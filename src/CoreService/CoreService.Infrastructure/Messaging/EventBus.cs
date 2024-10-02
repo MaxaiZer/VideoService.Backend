@@ -2,7 +2,7 @@ using CoreService.Application.Interfaces;
 using MassTransit;
 using Shared.Messages;
 
-namespace CoreService.Infrastructure.MessageBroker;
+namespace CoreService.Infrastructure.Messaging;
 
 public class EventBus : IEventBus
 {

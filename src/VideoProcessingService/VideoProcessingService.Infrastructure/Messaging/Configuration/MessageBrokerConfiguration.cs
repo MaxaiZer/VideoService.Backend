@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace CoreService.Infrastructure.MessageBroker;
+namespace VideoProcessingService.Infrastructure.Messaging.Configuration;
 
 public class MessageBrokerConfiguration
 {

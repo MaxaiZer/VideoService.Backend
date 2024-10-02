@@ -2,7 +2,7 @@ using MassTransit;
 using Shared.Messages;
 using VideoProcessingService.Core.Interfaces;
 
-namespace VideoProcessingService.Infrastructure.Consumers;
+namespace VideoProcessingService.Infrastructure.Messaging.Consumers;
 
 public class VideoProcessingRequestConsumer: IConsumer<VideoReadyForProcessing>
 {

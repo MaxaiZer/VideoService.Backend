@@ -6,7 +6,7 @@ using CoreService.Infrastructure.FileStorage;
 using CoreService.Infrastructure.Identity;
 using CoreService.Infrastructure.Jwt;
 using CoreService.Infrastructure.Logging;
-using CoreService.Infrastructure.MessageBroker;
+using CoreService.Infrastructure.Messaging;
 using MassTransit;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
