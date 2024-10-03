@@ -1,19 +1,24 @@
 ﻿using System.Diagnostics;
 using Microsoft.Extensions.Configuration;
-using HlsConversionResult = VideoProcessingService.Core.Models.HlsConversionResult;
-using IVideoConverter = VideoProcessingService.Core.Interfaces.IVideoConverter;
+using VideoProcessingService.Core.Models;
+using VideoProcessingService.Core.Interfaces;
 
-namespace VideoProcessingService.Infrastructure.Converters
+namespace VideoProcessingService.Infrastructure.Video
 {
     public class VideoConverter: IVideoConverter
     {
-        private readonly string? _ffmpegPath;
+        private readonly ThumbnailCreator _thumbnailCreator;
+        private readonly MediaProcessor _processor;
+        
+        private const int _segmentDurationInSeconds = 10;
+        
         public VideoConverter(IConfiguration configuration)
         {
-            _ffmpegPath = configuration["ffmpegPath"];
+            _processor = new MediaProcessor(configuration);
+            _thumbnailCreator = new ThumbnailCreator(configuration);
         }
-
-        public async Task<HlsConversionResult> ConvertToHlsAsync(string inputFilePath, string outputDirectory)
+        
+        public async Task<ConversionResult> ConvertAsync(string inputFilePath, string outputDirectory)
         {
             var masterPlaylistName = "master.m3u8";
             var masterPlaylistPath = Path.Combine(outputDirectory, masterPlaylistName);
@@ -24,13 +29,13 @@ namespace VideoProcessingService.Infrastructure.Converters
                                @"[v2]scale='if(gt(iw/ih,854/480),854,-1)':'if(gt(iw/ih,854/480),-1,480)',pad=854:480:(854-iw)/2:(480-ih)/2[v2out]"" " + 
                                "-map [v1out] -map 0:a -c:v libx264 -c:a aac -b:v:0 5000k " + 
                                "-map [v2out] -map 0:a -c:v libx264 -c:a aac -b:v:1 3000k " + 
-                               @"-f hls -hls_time 10 -hls_playlist_type vod -hls_segment_filename ""segment_%v_%03d.ts"" " +
+                               $@"-f hls -hls_time {_segmentDurationInSeconds} -hls_playlist_type vod -hls_segment_filename ""segment_%v_%03d.ts"" " +
                                $@"-master_pl_name ""{masterPlaylistName}"" -var_stream_map ""v:0,a:0 v:1,a:1"" stream_%v.m3u8";
             
             Stopwatch stopwatch = new Stopwatch();
             stopwatch.Start();
             
-            await StartFFmpegProcess(outputDirectory, arguments);
+            await _processor.StartProcess(MediaProcessor.Program.FFmpeg, outputDirectory, arguments);
             
             stopwatch.Stop();
             Console.WriteLine($"Conversion took {stopwatch.Elapsed.TotalSeconds} seconds");
@@ -40,49 +45,19 @@ namespace VideoProcessingService.Infrastructure.Converters
             playlists.Remove(masterPlaylistPath);
 
             LogSegmentsSize(segments);
-            
-            return new HlsConversionResult(
-                MasterPlaylistPath: masterPlaylistPath,
-                PlaylistsFilePaths: playlists,
-                SegmentsFilePaths: segments
-                );
-        }
-        
-        private async Task StartFFmpegProcess(string workingDirectory, string arguments)
-        {
-            string programPath = string.IsNullOrEmpty(_ffmpegPath) ? "ffmpeg" : _ffmpegPath;
-            var processStartInfo = new ProcessStartInfo
-            {
-                FileName = programPath,
-                Arguments = arguments,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                WorkingDirectory = workingDirectory
-            };
 
-            using Process process = new();
-            process.StartInfo = processStartInfo;
-            process.OutputDataReceived += (sender, args) => Console.WriteLine(args.Data);
+            var thumbnailResult = await _thumbnailCreator.Create(segments.First(),
+                _segmentDurationInSeconds / 2);
+
+            var subFiles = new List<string>();
+            subFiles.AddRange(playlists);
+            subFiles.AddRange(segments);
             
-            string errors = "";
-            
-            process.ErrorDataReceived += (sender, args) =>
-            {
-                Console.WriteLine(args.Data);
-                errors += args.Data;
-            };
-            
-            process.Start();
-            
-            process.BeginOutputReadLine();
-            process.BeginErrorReadLine();
-            
-            await process.WaitForExitAsync();
-            
-            if (process.ExitCode != 0) //don't use errors.Length != 0, ffmpeg logs all in error
-                throw new Exception(errors);
+            return new ConversionResult(
+                IndexFilePath: masterPlaylistPath,
+                ThumbnailPath: thumbnailResult.ImagePath,
+                SubFilesPaths: subFiles
+                );
         }
         
         private void LogSegmentsSize(List<string> segments)

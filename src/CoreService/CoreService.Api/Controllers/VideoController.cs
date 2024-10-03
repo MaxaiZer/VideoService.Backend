@@ -112,7 +112,7 @@ namespace CoreService.Api.Controllers
         /// <returns>HTTP 200 status code with the file if found; otherwise, returns a 404 status code.</returns>
         /// <response code="200">File retrieved successfully.</response>
         /// <response code="404">File not found.</response>
-        [HttpGet("{videoId:guid}/files/{fileName:regex(^.*\\.(m3u8|ts)$)}")]
+        [HttpGet("{videoId:guid}/files/{fileName:regex(^.*\\.(m3u8|ts|jpg)$)}")]
         public async Task<IActionResult> GetSubFile(Guid videoId, string fileName)
         {
             var file = await _videoService.GetSubFile(videoId, fileName);

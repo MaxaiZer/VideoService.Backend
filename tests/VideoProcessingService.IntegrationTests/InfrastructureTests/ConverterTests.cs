@@ -2,7 +2,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using VideoProcessingService.Core.Models;
-using VideoProcessingService.Infrastructure.Converters;
+using VideoProcessingService.Infrastructure.Video;
 using VideoProcessingService.IntegrationTests.Tools;
 
 namespace VideoProcessingService.IntegrationTests.InfrastructureTests;
@@ -27,14 +27,14 @@ public class ConverterTests: IClassFixture<FFmpegFixture>
         var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestData/rabbit320.mp4");
         var videoConverter = new VideoConverter(mockConfig.Object);
 
-        HlsConversionResult result;
+        ConversionResult result;
         try
         {
-            result = await videoConverter.ConvertToHlsAsync(filePath, tmpDirectory);
+            result = await videoConverter.ConvertAsync(filePath, tmpDirectory);
             result.Should().NotBeNull();
 
-            string masterPlaylistContent = File.ReadAllText(result.MasterPlaylistPath);
-            string playlistContent = File.ReadAllText(result.PlaylistsFilePaths.First());
+            string masterPlaylistContent = File.ReadAllText(result.IndexFilePath);
+            string playlistContent = File.ReadAllText(result.SubFilesPaths.First(f => f.EndsWith(".m3u8")));
         
             HlsParser.ExtractFirstPlaylistUrl(masterPlaylistContent).Should().NotBeNullOrEmpty();
             HlsParser.ExtractFirstSegmentUrl(playlistContent).Should().NotBeNullOrEmpty();

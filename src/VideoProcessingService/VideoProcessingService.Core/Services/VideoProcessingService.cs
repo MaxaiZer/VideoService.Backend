@@ -49,7 +49,7 @@ namespace VideoProcessingService.Core.Services
                     await inputStream.CopyToAsync(fileStream);
                 }
                 
-                var res = await _videoConverter.ConvertToHlsAsync(inputFilePath, tmpDirectory);
+                var res = await _videoConverter.ConvertAsync(inputFilePath, tmpDirectory);
                 await StoreResultFilesAsync(videoId, res);
                 
                 _unitOfWork.BeginTransaction();
@@ -81,15 +81,15 @@ namespace VideoProcessingService.Core.Services
             }
         }
 
-        private async Task StoreResultFilesAsync(string videoId, HlsConversionResult res)
+        private async Task StoreResultFilesAsync(string videoId, ConversionResult res)
         {
             var tasks = new List<Task>
             {
-                StoreFileAsync(videoId, res.MasterPlaylistPath, isMasterPlaylist: true)
+                StoreFileAsync(videoId, res.IndexFilePath, isMasterPlaylist: true),
+                StoreFileAsync(videoId, res.ThumbnailPath, isMasterPlaylist: false)
             };
 
-            tasks.AddRange(res.PlaylistsFilePaths.Select(file => StoreFileAsync(videoId, file, isMasterPlaylist: false)));
-            tasks.AddRange(res.SegmentsFilePaths.Select(file => StoreFileAsync(videoId, file, isMasterPlaylist: false)));
+            tasks.AddRange(res.SubFilesPaths.Select(file => StoreFileAsync(videoId, file, isMasterPlaylist: false)));
             await Task.WhenAll(tasks);
         }
 

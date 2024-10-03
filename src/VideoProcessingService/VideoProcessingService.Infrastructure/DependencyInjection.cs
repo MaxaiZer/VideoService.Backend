@@ -7,11 +7,11 @@ using Minio;
 using NLog;
 using Shared.Messages;
 using VideoProcessingService.Core.Interfaces;
-using VideoProcessingService.Infrastructure.Converters;
 using VideoProcessingService.Infrastructure.Data;
 using VideoProcessingService.Infrastructure.Logging;
 using VideoProcessingService.Infrastructure.Messaging.Configuration;
 using VideoProcessingService.Infrastructure.Messaging.Consumers;
+using VideoProcessingService.Infrastructure.Video;
 
 namespace VideoProcessingService.Infrastructure;
 
@@ -22,10 +22,11 @@ public static class DependencyInjection
         services
             .ConfigureMinio(configuration)
             .ConfigureMassTransit(configuration)
-            .ConfigureFileStorage()
-            .ConfigureUnitOfWork()
-            .ConfigureVideoConverter()
             .ConfigureLoggerService(configuration);
+
+        services.AddScoped<IVideoConverter, VideoConverter>();
+        services.AddScoped<IFileStorage, MinioFileStorage>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
     }
 
     private static IServiceCollection ConfigureMassTransit(this IServiceCollection services,
@@ -62,11 +63,6 @@ public static class DependencyInjection
 
         return services;
     }
-    private static IServiceCollection ConfigureFileStorage(this IServiceCollection services) =>
-        services.AddScoped<IFileStorage, MinioFileStorage>();
-
-    private static IServiceCollection ConfigureVideoConverter(this IServiceCollection services) =>
-        services.AddScoped<IVideoConverter, VideoConverter>();
 
     private static IServiceCollection ConfigureMinio(this IServiceCollection services, IConfiguration configuration)
     {
@@ -99,12 +95,6 @@ public static class DependencyInjection
         
         LogManager.Setup().LoadConfigurationFromFile(Path.Combine(Directory.GetCurrentDirectory(), nlogConfigPath));
         services.AddSingleton<ILoggerManager, LoggerManager>();
-        return services;
-    }
-    
-    private static IServiceCollection ConfigureUnitOfWork(this IServiceCollection services)
-    {
-        services.AddScoped<IUnitOfWork, UnitOfWork>();
         return services;
     }
 }

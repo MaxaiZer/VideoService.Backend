@@ -30,17 +30,20 @@ namespace VideoProcessingService.UnitTests.CoreTests
             );
         }
 
-        private void SetupSuccessfulVideoProcessingTest(out VideoReadyForProcessing message, out VideoProcessingRequest request, out HlsConversionResult conversionResult)
+        private void SetupSuccessfulVideoProcessingTest(out VideoReadyForProcessing message, out VideoProcessingRequest request, out ConversionResult conversionResult)
         {
             var directory = Path.GetTempPath();
             var tempMaster = new TempFileFixture(Path.Combine(directory, "master.m3u8"));
             var tempIndex = new TempFileFixture(Path.Combine(directory, "index.m3u8"));
             var tempSegment1 = new TempFileFixture(Path.Combine(directory, "segment1.ts"));
             var tempSegment2 = new TempFileFixture(Path.Combine(directory, "segment2.ts"));
+            var thumbnail = new TempFileFixture(Path.Combine(directory, "thumbnail.jpg"));
 
-            conversionResult = new HlsConversionResult(MasterPlaylistPath: tempMaster.FilePath,
-                PlaylistsFilePaths: [tempIndex.FilePath],
-                SegmentsFilePaths: [tempSegment1.FilePath, tempSegment2.FilePath]);
+            conversionResult = new ConversionResult(
+                IndexFilePath: tempMaster.FilePath,
+                SubFilesPaths: [tempIndex.FilePath, tempSegment1.FilePath, tempSegment2.FilePath],
+                ThumbnailPath: thumbnail.FilePath
+                );
 
             var videoId =  Guid.NewGuid().ToString();
             var requestId = Guid.NewGuid().ToString();
@@ -48,7 +51,7 @@ namespace VideoProcessingService.UnitTests.CoreTests
                 new VideoProcessingRequest(requestId, videoId, VideoProcessingRequest.ProcessingStatus.Appending);
             message = new VideoReadyForProcessing { RequestId = requestId };
             
-            _mockVideoConverter.Setup(vc => vc.ConvertToHlsAsync(It.IsAny<string>(), It.IsAny<string>()))
+            _mockVideoConverter.Setup(vc => vc.ConvertAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(conversionResult);
             _mockFileStorage.Setup(fs => fs.GetFileAsync(videoId, true)).ReturnsAsync(new MemoryStream());
             _mockFileStorage.Setup(fs => fs.PutFileAsync(It.IsAny<string>(), It.IsAny<Stream>())).Returns(Task.CompletedTask);
@@ -76,13 +79,13 @@ namespace VideoProcessingService.UnitTests.CoreTests
             
             await _videoProcessingService.ProcessAndStoreVideoAsync(message);
 
-            string targetSegmentName = StorageFileNamingHelper.GetNameForVideoSubFile(request.VideoId,
-                        Path.GetFileName(conversionResult.SegmentsFilePaths.ToArray()[0]));
-            _mockFileStorage.Verify(fs => fs.PutFileAsync(targetSegmentName, It.IsAny<Stream>()), Times.Once);
-
-            targetSegmentName = StorageFileNamingHelper.GetNameForVideoSubFile(request.VideoId,
-                       Path.GetFileName(conversionResult.SegmentsFilePaths.ToArray()[1]));
-            _mockFileStorage.Verify(fs => fs.PutFileAsync(targetSegmentName, It.IsAny<Stream>()), Times.Once);
+            foreach (var subfile in conversionResult.SubFilesPaths)
+            {
+                string targetFileName = StorageFileNamingHelper.GetNameForVideoSubFile(request.VideoId,
+                    Path.GetFileName(subfile));
+                
+                _mockFileStorage.Verify(fs => fs.PutFileAsync(targetFileName, It.IsAny<Stream>()), Times.Once);
+            }
         }
 
         [Fact]
