@@ -71,8 +71,12 @@ jobs:
       id: changes
       with:
         filters: |
-          src:
-            - 'src/**'
+          coreService:
+            - 'src/CoreService/**'
+            - 'src/Shared/**'
+          videoProcessingService:
+            - 'src/VideoProcessingService/**'
+            - 'src/Shared/**'
 
     - name: Set lowercase docker image prefix
       if: success()
@@ -81,7 +85,7 @@ jobs:
         PREFIX: '${{ github.repository_owner }}'
 
     - name: Build and push CoreService docker image
-      if: success() && steps.changes.outputs.src == 'true'
+      if: success() && steps.changes.outputs.coreService == 'true'
       id: build_core_image
       uses: docker/build-push-action@v6
       with:
@@ -91,7 +95,7 @@ jobs:
         push: true
 
     - name: Build and push VideoProcessingService docker image
-      if: success() && steps.changes.outputs.src == 'true'
+      if: success() && steps.changes.outputs.videoProcessingService == 'true'
       id: build_vps_image
       uses: docker/build-push-action@v6
       with:
