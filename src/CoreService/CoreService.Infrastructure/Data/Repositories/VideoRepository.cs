@@ -16,8 +16,7 @@ namespace CoreService.Infrastructure.Data.Repositories
         {
             return await context.Videos.Where(video => video.Processed == true)
                 .Where(video => video.Id == id)
-                .Join(
-                    context.Users,
+                .Join(context.Users,
                     video => video.UserId,
                     user => user.Id,
                     (video, user) => new ViewableVideoMetadata(
@@ -26,36 +25,36 @@ namespace CoreService.Infrastructure.Data.Repositories
                         user.UserName,
                         video.Name,
                         video.Description,
-                        video.CreatedAt
-                    )
-                )
+                        video.CreatedAt))
                 .AsNoTracking()
                 .FirstOrDefaultAsync(cancellationToken);
         }
-        
-        public async Task<List<ViewableVideoMetadata>> FindViewableAsync(string searchQuery, int pageNumber, int pageSize, 
-            CancellationToken cancellationToken = default)
+
+        public async Task<List<ViewableVideoMetadata>> FindViewableAsync(string? searchQuery, int pageNumber,
+            int pageSize, CancellationToken cancellationToken = default)
         {
             var minSimilarityThreshold = 0.1;
-            
-            return await context.Videos.Where(video => video.Processed == true)
-                .Where(video => EF.Functions.TrigramsSimilarity(video.Name, searchQuery) >= minSimilarityThreshold)
-                .OrderByDescending(video => EF.Functions.TrigramsSimilarity(video.Name, searchQuery))
-                .Skip((pageNumber - 1) * pageSize)
+
+            var query = context.Videos.Where(video => video.Processed == true);
+            if (!string.IsNullOrWhiteSpace(searchQuery))
+            {
+                query = query
+                    .Where(video => EF.Functions.TrigramsSimilarity(video.Name, searchQuery) >= minSimilarityThreshold)
+                    .OrderByDescending(video => EF.Functions.TrigramsSimilarity(video.Name, searchQuery));
+            }
+
+            return await query.Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .Join(
-                    context.Users,
-                    video => video.UserId,
+                .Join(context.Users, 
+                    video => video.UserId, 
                     user => user.Id,
                     (video, user) => new ViewableVideoMetadata(
-                        video.Id, 
-                        user.Id, 
+                        video.Id,
+                        user.Id,
                         user.UserName,
-                        video.Name, 
-                        video.Description, 
-                        video.CreatedAt
-                        )
-                )
+                        video.Name,
+                        video.Description,
+                        video.CreatedAt))
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
