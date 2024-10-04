@@ -3,20 +3,27 @@ using CoreService.Application;
 using CoreService.Application.Interfaces;
 using CoreService.Infrastructure;
 using CoreService.Infrastructure.Data.Context;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.ConfigureCors();
 
-// Add services to the container.
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.ConfigureSwagger();
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddApplicationServices(builder.Configuration);
+
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 var app = builder.Build();
 
@@ -29,31 +36,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
-
 app.UseCors("CorsPolicy");
+
+app.UseForwardedHeaders();
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-/*using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    var context = services.GetRequiredService<RepositoryContext>();
-    
-    var retryPolicy = PolicyExtensions.GetRetryPolicy();
-
-    await retryPolicy.ExecuteAsync(async () =>
-    {
-        if (context.Database.GetPendingMigrations().Any())
-        {
-            await context.Database.MigrateAsync();
-        }
-    });
-}
-*/
 
 using (var scope = app.Services.CreateScope())
 {
