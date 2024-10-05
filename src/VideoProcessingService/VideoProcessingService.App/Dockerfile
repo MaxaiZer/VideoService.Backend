@@ -21,9 +21,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["src/VideoProcessingService/VideoProcessingService.App/VideoProcessingService.App.csproj", "src/VideoProcessingService/VideoProcessingService.App/"]
-COPY ["localNuGetPackages", "src/VideoProcessingService/localNuGetPackages"]
-RUN dotnet nuget add source /src/src/VideoProcessingService/localNuGetPackages --name localNuGetPackages
-RUN dotnet restore "src/VideoProcessingService/VideoProcessingService.App/VideoProcessingService.App.csproj"
+RUN dotnet restore "src/VideoProcessingService/VideoProcessingService.App/VideoProcessingService.App.csproj" #--configfile NuGet.config
 COPY ["src/Shared", "src/Shared/"]
 COPY ["src/VideoProcessingService", "src/VideoProcessingService/"]
 WORKDIR src/VideoProcessingService/VideoProcessingService.App

@@ -5,10 +5,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
-COPY ["localNuGetPackages", "src/CoreService/localNuGetPackages"]
 COPY ["src/CoreService/CoreService.Api/CoreService.Api.csproj", "src/CoreService/CoreService.Api/"]
-RUN dotnet nuget add source /src/src/CoreService/localNuGetPackages --name localNuGetPackages
-RUN dotnet restore "src/CoreService/CoreService.Api/CoreService.Api.csproj"
+RUN dotnet restore "src/CoreService/CoreService.Api/CoreService.Api.csproj" #--configfile NuGet.config
 COPY ["src/Shared", "src/Shared/"]
 COPY ["src/CoreService", "src/CoreService/"]
 WORKDIR src/CoreService/CoreService.Api
