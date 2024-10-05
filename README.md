@@ -25,5 +25,3 @@ subgraph Shared
         VideoProcessingService --> Shared;
         Nginx --> CoreService;
 ```
-
-P.S. используется локальный nuget пакет с клиентом  для MinIO (с исправленным багом из 6.0.3), т.к. там долго не аппрувят критические пр'ы
