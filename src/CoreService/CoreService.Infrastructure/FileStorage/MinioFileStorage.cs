@@ -48,7 +48,7 @@ namespace CoreService.Infrastructure.FileStorage
                 .WithExpiry(60 * 60 * 12);
 
             var url = await _client.PresignedPutObjectAsync(args);
-            return url.Replace(_config.Endpoint, _config.PublicHost);
+            return url.Replace(_config.Endpoint, _config.PublicUrl);
         }
     }
 }

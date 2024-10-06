@@ -31,7 +31,7 @@ services:
       dockerfile: src/CoreService/CoreService.Api/Dockerfile
     environment:
       MINIO__ENDPOINT: ${MINIO_ENDPOINT}
-      MINIO__PublicHost: ${MINIO_PUBLIC_URL}/storage
+      MINIO__PublicUrl: ${MINIO_PUBLIC_URL}/storage
       MINIO__AccessKey: ${MINIO_ROOT_USER}
       MINIO__SecretKey: ${MINIO_ROOT_PASSWORD}
       MINIO__BucketName: ${MINIO_BUCKET}

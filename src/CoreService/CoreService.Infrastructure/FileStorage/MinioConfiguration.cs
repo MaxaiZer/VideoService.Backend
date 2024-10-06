@@ -9,7 +9,7 @@ public class MinioConfiguration
     [Required]
     public string Endpoint { get; init; }
     [Required]
-    public string PublicHost { get; init; }
+    public string PublicUrl { get; init; }
     [Required]
     public string AccessKey { get; init; }
     [Required]
