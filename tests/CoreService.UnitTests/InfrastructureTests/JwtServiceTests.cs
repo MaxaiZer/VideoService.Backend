@@ -17,10 +17,10 @@ public class JwtServiceTests
     {
         var jwt = new JwtConfiguration
         {
-            ValidIssuer = "TestIssuer",
-            ValidAudience = "TestAudience",
-            AccessTokenExpirationMinutes = "15",
-            RefreshTokenExpirationDays = "7",
+            Issuer = "TestIssuer",
+            Audience = "TestAudience",
+            AccessLifetime = 900,
+            RefreshLifetime = 604800,
             Secret = "super_secret_test_key_for_unit_tests"
         };
       

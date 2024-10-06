@@ -110,7 +110,7 @@ namespace CoreService.Api.Controllers
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.Strict,
-                Expires = DateTime.UtcNow.AddDays(Convert.ToDouble(_jwtConfig.RefreshTokenExpirationDays))
+                Expires = DateTime.UtcNow.AddSeconds(_jwtConfig.RefreshLifetime)
             };
         }
         

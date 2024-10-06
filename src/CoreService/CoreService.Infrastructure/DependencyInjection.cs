@@ -170,8 +170,8 @@ public static class DependencyInjection
                     ValidateAudience = true,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
-                    ValidIssuer = jwtConfig.ValidIssuer,
-                    ValidAudience = jwtConfig.ValidAudience,
+                    ValidIssuer = jwtConfig.Issuer,
+                    ValidAudience = jwtConfig.Audience,
                     IssuerSigningKey = new
                         SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtConfig.Secret))
                 };

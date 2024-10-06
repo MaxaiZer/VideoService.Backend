@@ -35,7 +35,7 @@ public class JwtService : IJwtService
         rng.GetBytes(randomNumber);
         var token = Convert.ToBase64String(randomNumber);
         
-        var expiryTime = DateTimeOffset.Now.AddDays(Convert.ToDouble(_config.RefreshTokenExpirationDays));
+        var expiryTime = DateTimeOffset.Now.AddSeconds(_config.RefreshLifetime);
         return new RefreshTokenResult(token, expiryTime);
     }
     
@@ -52,8 +52,8 @@ public class JwtService : IJwtService
             IssuerSigningKey = f, //new SymmetricSecurityKey(
               //  Encoding.UTF8.GetBytes(_secretKey)),
             ValidateLifetime = true,
-            ValidIssuer = _config.ValidIssuer,
-            ValidAudience = _config.ValidAudience
+            ValidIssuer = _config.Issuer,
+            ValidAudience = _config.Audience
         };
 
         var tokenHandler = new JwtSecurityTokenHandler();
@@ -89,10 +89,10 @@ public class JwtService : IJwtService
     private JwtSecurityToken GenerateTokenOptions(SigningCredentials signingCredentials, List<Claim> claims)
     {
         var tokenOptions = new JwtSecurityToken(
-            issuer: _config.ValidIssuer,
-            audience: _config.ValidAudience,
+            issuer: _config.Issuer,
+            audience: _config.Audience,
             claims: claims,
-            expires: DateTime.Now.AddMinutes(Convert.ToDouble(_config.AccessTokenExpirationMinutes)),
+            expires: DateTime.Now.AddSeconds(_config.AccessLifetime),
             signingCredentials: signingCredentials);
 
         return tokenOptions;
