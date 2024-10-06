@@ -7,11 +7,11 @@ public class MessageBrokerConfiguration
     [Required]
     public static string Section => "MessageBroker";
     [Required]
-    public string Host { get; set; }
+    public string Host { get; init; }
     [Required]
-    public string Username { get; set; }
+    public string Username { get; init; }
     [Required]
-    public string Password { get; set; }
+    public string Password { get; init; }
     [Required]
-    public string VideoProcessingExchangeName { get; set; }
+    public string VideoProcessingExchangeName { get; init; }
 }

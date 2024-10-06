@@ -7,13 +7,13 @@ public class MinioConfiguration
     [Required]
     public static string Section => "MinIO";
     [Required]
-    public string Endpoint { get; set; }
+    public string Endpoint { get; init; }
     [Required]
-    public string AccessKey { get; set; }
+    public string AccessKey { get; init; }
     [Required]
-    public string SecretKey { get; set; }
+    public string SecretKey { get; init; }
     [Required]
-    public string BucketName { get; set; }
+    public string BucketName { get; init; }
     [Required] 
-    public string TmpFolder { get; set; }
+    public string TmpFolder { get; init; }
 }

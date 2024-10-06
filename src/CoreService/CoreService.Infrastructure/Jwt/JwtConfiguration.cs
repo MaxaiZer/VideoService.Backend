@@ -8,19 +8,19 @@ public class JwtConfiguration
     public static string Section => "Jwt";
 
     [Required]
-    public string Secret { get; set; }
+    public string Secret { get; init; }
 
     [Required]
-    public string Issuer { get; set; }
+    public string Issuer { get; init; }
     
     [Required]
-    public string Audience { get; set; }
+    public string Audience { get; init; }
     
     [Required]
     [Range(1, int.MaxValue, ErrorMessage = "AccessLifetime must be greater than 0.")]
-    public int AccessLifetime { get; set; }
+    public int AccessLifetime { get; init; }
     
     [Required]
     [Range(1, int.MaxValue, ErrorMessage = "RefreshLifetime must be greater than 0.")]
-    public int RefreshLifetime { get; set; }
+    public int RefreshLifetime { get; init; }
 }
