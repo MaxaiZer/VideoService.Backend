@@ -59,15 +59,13 @@ namespace CoreService.Api.Controllers
         /// <param name="parameters">Search parameters</param>
         /// <returns>HTTP 200 status code with video metadata if the video exists.</returns>
         /// <response code="200">Videos metadata retrieved successfully.</response>
-        /// <response code="400">Videos wasn't found.</response>
+        /// <response code="204">Videos not found.</response>
         public async Task<IActionResult> GetMetadata([FromQuery]VideoParameters parameters, CancellationToken cancellationToken)
         {
-            //todo: do not return domain entity
-            var video = await _videoService.GetVideosMetadata(parameters, cancellationToken);
-            if (video == null)
-                return BadRequest();
+            var videos = await _videoService.GetVideosMetadata(parameters, cancellationToken);
+            if (videos.Count == 0) return NoContent();
 
-            return Ok(video);
+            return Ok(videos);
         }
         
         /// <summary>
@@ -76,14 +74,12 @@ namespace CoreService.Api.Controllers
         /// <param name="videoId">Id of the video.</param>
         /// <returns>HTTP 200 status code with video metadata if the video exists.</returns>
         /// <response code="200">Video metadata retrieved successfully.</response>
-        /// <response code="400">Video wasn't found.</response>
+        /// <response code="404">Video not found.</response>
         [HttpGet("{videoId}")]
         public async Task<IActionResult> GetMetadata(string videoId, CancellationToken cancellationToken)
         {
-            //todo: do not return domain entity
             var video = await _videoService.GetVideoMetadata(videoId, cancellationToken);
-            if (video == null)
-                return BadRequest();
+            if (video == null) return NotFound();
 
             return Ok(video);
         }
