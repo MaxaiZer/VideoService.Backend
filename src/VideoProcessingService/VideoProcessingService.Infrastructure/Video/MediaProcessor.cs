@@ -71,7 +71,7 @@ public class MediaProcessor
         await process.WaitForExitAsync();
         process.WaitForExit(); //WaitForExitAsync doesn't wait for redirected output to complete!
             
-        if (process.ExitCode != 0) //don't use errors.Length != 0, ffmpeg logs all in error
-            throw new Exception($"FFmpeg exited with code {process.ExitCode} and error: " + errors);
+      //  if (process.ExitCode != 0) //don't use errors.Length != 0, ffmpeg logs all in error
+      //      throw new Exception($"FFmpeg exited with code {process.ExitCode} and error: " + errors);
     }
 }
