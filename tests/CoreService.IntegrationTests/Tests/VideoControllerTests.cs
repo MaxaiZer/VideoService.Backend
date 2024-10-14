@@ -105,7 +105,15 @@ namespace CoreService.IntegrationTests.Tests
             var uploadUrlResult = JsonConvert.DeserializeObject<GeneratedUploadUrlDto>(getUrlResponseContent);
 
             var uploadFileResponse = await UploadVideoFile(videoFilePath, uploadUrlResult.Url, useOwnHttpClient: true);
-            uploadFileResponse.EnsureSuccessStatusCode();
+            
+            try
+            {
+                uploadFileResponse.EnsureSuccessStatusCode();
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new HttpRequestException($"The request to {uploadUrlResult.Url} failed: {ex.Message}", ex);
+            }
             
             var uploadDataResponse = await UploadVideoInfo(
                 new VideoUploadDto
