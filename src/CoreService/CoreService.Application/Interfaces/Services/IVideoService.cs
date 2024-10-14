@@ -12,9 +12,5 @@ namespace CoreService.Application.Interfaces.Services
         public Task<List<ViewableVideoMetadata>> GetVideosMetadata(VideoParameters parameters, CancellationToken cancellationToken = default);
         
         public Task<GeneratedUploadUrlDto> GetUploadUrl();
-
-        public Task<Stream?> GetMasterPlaylist(Guid videoId);
-
-        public Task<Stream?> GetSubFile(Guid videoId, string fileName);
     }
 }

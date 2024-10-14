@@ -88,31 +88,5 @@ namespace CoreService.Application.Services
 
             return new GeneratedUploadUrlDto(url, fileName);
         }
-
-        public async Task<Stream?> GetMasterPlaylist(Guid videoId)
-        {
-            return await GetFile(StorageFileNamingHelper.GetNameForVideoMasterPlaylist(videoId.ToString()));
-        }
-        
-        public async Task<Stream?> GetSubFile(Guid videoId, string name)
-        {
-            return await GetFile(StorageFileNamingHelper.GetNameForVideoSubFile(videoId.ToString(), name));
-        }
-
-        private async Task<Stream?> GetFile(string storageFileName)
-        {
-            try
-            {
-                return await _fileStorage.GetFileAsync(storageFileName);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Something went wrong in the " +
-                                 $"{nameof(GetFile)} service method: {ex}");
-
-                throw;
-            }
-        }
-
     }
 }

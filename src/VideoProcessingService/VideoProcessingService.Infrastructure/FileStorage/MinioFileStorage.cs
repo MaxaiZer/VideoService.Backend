@@ -40,10 +40,10 @@ namespace VideoProcessingService.Infrastructure.FileStorage
             return stream;
         }
 
-        public async Task PutFileAsync(string name, Stream stream)
+        public async Task PutFileAsync(string name, Stream stream, bool isPublic = false)
         {
             var args = new PutObjectArgs()
-                .WithObject(name)
+                .WithObject((isPublic ? $"{_config.PublicFolder}/" : "") + name)
                 .WithBucket(_config.BucketName)
                 .WithStreamData(stream)
                 .WithObjectSize(stream.Length);

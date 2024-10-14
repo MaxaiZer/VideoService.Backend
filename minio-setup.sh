@@ -10,18 +10,25 @@ until mc ready local; do
     sleep 5
 done
 
-/usr/bin/mc alias set myminio http://127.0.0.1:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD";
+mc alias set myminio http://127.0.0.1:9000 "$MINIO_ROOT_USER" "$MINIO_ROOT_PASSWORD";
 
-if ! /usr/bin/mc mb myminio/"$BUCKET_NAME" --ignore-existing; then
+if ! mc mb myminio/"$BUCKET_NAME" --ignore-existing; then
     echo "Error: Unable to create bucket '$BUCKET_NAME'."
     exit 1
 fi
 
-if [ -n "$(/usr/bin/mc ilm ls myminio/"$BUCKET_NAME" 2>/dev/null)" ]; then
-    echo "ILM rule for prefix 'tmp/' already exists."
+if [ -z "$(mc anonymous list myminio/"$BUCKET_NAME"/"$PUBLIC_FOLDER"/ 2>/dev/null)" ]; then
+    echo "Creating public read-only policy for folder '$PUBLIC_FOLDER'..."
+    mc anonymous set download myminio/"$BUCKET_NAME"/"$PUBLIC_FOLDER"/
 else
-    if ! /usr/bin/mc ilm add --expiry-days 3 --prefix "$TMP_FOLDER/" myminio/"$BUCKET_NAME"; then
-        echo "Error: Unable to add ILM rule for prefix '$TMP_FOLDER/'."
+    echo "Public read-only policy for folder '$PUBLIC_FOLDER' already exists."
+fi
+
+if [ -n "$(mc ilm ls myminio/"$BUCKET_NAME" 2>/dev/null)" ]; then
+    echo "Lifecycle management rule for prefix 'tmp/' already exists."
+else
+    if ! mc ilm add --expiry-days 3 --prefix "$TMP_FOLDER/" myminio/"$BUCKET_NAME"; then
+        echo "Error: Unable to add lifecycle management rule for prefix '$TMP_FOLDER/'."
         exit 1
     fi
 fi

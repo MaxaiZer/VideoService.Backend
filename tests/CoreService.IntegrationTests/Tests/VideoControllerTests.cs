@@ -21,27 +21,6 @@ namespace CoreService.IntegrationTests.Tests
         }
 
         [Fact]
-        public async Task GetVideoPlaylist_WhenVideoIdDoesNotExist_ShouldReturnNotFound()
-        {
-            var videoId = new Guid("11111111-1111-1111-1111-111111111111");
-
-            var response = await _client.GetAsync($"{_baseUrl}/{videoId}/files/master-playlist");
-
-            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        }
-
-        [Fact]
-        public async Task GetVideoSegment_WhenVideoIdDoesNotExist_ShouldReturnNotFound()
-        {
-            var videoId = new Guid("22222222-2222-2222-2222-222222222222");
-            var segmentName = "out0.ts";
-
-            var response = await _client.GetAsync($"{_baseUrl}/{videoId}/files/{segmentName}");
-
-            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        }
-        
-        [Fact]
         public async Task GetUploadUrl_WhenUnauthorizedUser_ShouldReturnUnauthorized()
         {
             var response = await _client.GetAsync($"{_baseUrl}/upload-url");

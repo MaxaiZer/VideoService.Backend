@@ -10,6 +10,7 @@ services:
       MINIO__SecretKey: ${MINIO_ROOT_PASSWORD}
       MINIO__BucketName: ${MINIO_BUCKET}
       MINIO__TmpFolder: ${MINIO_TMP_FOLDER}
+      MINIO__PublicFolder: ${MINIO_PUBLIC_FOLDER}
       MessageBroker__HOST: rabbitmq
       MessageBroker__USERNAME: ${RABBITMQ_USER}
       MessageBroker__PASSWORD: ${RABBITMQ_PASSWORD}
@@ -66,6 +67,7 @@ services:
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
       BUCKET_NAME: ${MINIO_BUCKET}
       TMP_FOLDER: ${MINIO_TMP_FOLDER}
+      PUBLIC_FOLDER: ${MINIO_PUBLIC_FOLDER}
     volumes:
       - minio_data:/data
       - ./minio-setup.sh:/usr/local/bin/minio-setup.sh

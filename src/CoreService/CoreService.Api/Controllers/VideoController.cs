@@ -3,7 +3,6 @@ using CoreService.Application.Dto;
 using CoreService.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles;
 
 namespace CoreService.Api.Controllers
 {
@@ -82,55 +81,6 @@ namespace CoreService.Api.Controllers
             if (video == null) return NotFound();
 
             return Ok(video);
-        }
-        
-        /// <summary>
-        /// Retrieves the master playlist file for the specified video.
-        /// </summary>
-        /// <param name="videoId">The ID of the video.</param>
-        /// <returns>HTTP 200 status code with the master playlist file if found; otherwise, returns a 404 status code.</returns>
-        /// <response code="200">Master playlist retrieved successfully.</response>
-        /// <response code="404">Master playlist not found.</response>
-        [HttpGet("{videoId}/files/master-playlist")]
-        public async Task<IActionResult> GetMasterPlaylist(Guid videoId)
-        {
-            var playlist = await _videoService.GetMasterPlaylist(videoId);
-            if (playlist == null) return NotFound();
-
-            return File(playlist, "application/vnd.apple.mpegurl");
-        }
-        
-        /// <summary>
-        /// Retrieves a specific file, related to video.
-        /// </summary>
-        /// <param name="videoId">The ID of the video.</param>
-        /// <param name="fileName">The name of the file.</param>
-        /// <returns>HTTP 200 status code with the file if found; otherwise, returns a 404 status code.</returns>
-        /// <response code="200">File retrieved successfully.</response>
-        /// <response code="404">File not found.</response>
-        [HttpGet("{videoId:guid}/files/{fileName:regex(^.*\\.(m3u8|ts|jpg)$)}")]
-        public async Task<IActionResult> GetSubFile(Guid videoId, string fileName)
-        {
-            var file = await _videoService.GetSubFile(videoId, fileName);
-            if (file == null) return NotFound();
-
-            var contentType = GetContentType(fileName);
-            return File(file, contentType);
-        }
-
-        private string GetContentType(string fileName)
-        {
-            var provider = new FileExtensionContentTypeProvider();
-            
-            provider.Mappings[".m3u8"] = "application/vnd.apple.mpegurl";
-            provider.Mappings[".ts"] = "video/MP2T";
-            
-            if (!provider.TryGetContentType(fileName, out var contentType))
-            {
-                contentType = "application/octet-stream"; 
-            }
-    
-            return contentType;
         }
     }
 }

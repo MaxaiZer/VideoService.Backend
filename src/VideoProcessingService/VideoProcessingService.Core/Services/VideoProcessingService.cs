@@ -101,7 +101,7 @@ namespace VideoProcessingService.Core.Services
                 : StorageFileNamingHelper.GetNameForVideoSubFile(videoId, fileName);
 
             await using var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-            await _fileStorage.PutFileAsync(storageFileName, fileStream);
+            await _fileStorage.PutFileAsync(storageFileName, fileStream, isPublic: true);
         }
     }
 }

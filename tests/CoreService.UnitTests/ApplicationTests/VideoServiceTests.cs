@@ -13,7 +13,6 @@ namespace CoreService.UnitTests.ApplicationTests
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
         private readonly Mock<IFileStorage> _mockFileStorage;
         private readonly Mock<ILoggerManager> _mockLogger;
-        private readonly Mock<IEventBus> _mockBus;
         private readonly VideoService _videoService;
 
         public VideoServiceTests()
@@ -21,13 +20,13 @@ namespace CoreService.UnitTests.ApplicationTests
             _mockUnitOfWork = new Mock<IUnitOfWork>();
             _mockFileStorage = new Mock<IFileStorage>();
             _mockLogger = new Mock<ILoggerManager>();
-            _mockBus = new Mock<IEventBus>();   
+            Mock<IEventBus> mockBus = new();   
             
             _videoService = new VideoService(
                 _mockUnitOfWork.Object,
                 _mockFileStorage.Object,
                 _mockLogger.Object,
-                _mockBus.Object
+                mockBus.Object
             );
         }
 
@@ -79,36 +78,6 @@ namespace CoreService.UnitTests.ApplicationTests
 
             result.Url.Should().Be(expectedUrl);
             result.FileName.Should().NotBeNullOrEmpty();
-        }
-
-        [Fact]
-        public async Task GetSubFile_WhenFileExists_ShouldReturnStream()
-        {
-            var videoId = Guid.NewGuid();
-            var fileName = "playlist.m3u8";
-            var expectedName = StorageFileNamingHelper.GetNameForVideoSubFile(videoId.ToString(), fileName);
-            var expectedStream = new MemoryStream();
-            _mockFileStorage.Setup(fs => fs.GetFileAsync(expectedName, false)).ReturnsAsync(expectedStream);
-
-            var result = await _videoService.GetSubFile(videoId, fileName);
-
-            result.Should().BeSameAs(expectedStream);
-        }
-
-        [Fact]
-        public async Task GetSubFile_WhenExceptionOccurs_ShouldLogErrorAndThrow()
-        {
-            var videoId = Guid.NewGuid();
-            var fileName = "playlist.m3u8";
-            var expectedName = StorageFileNamingHelper.GetNameForVideoSubFile(videoId.ToString(), fileName);
-            
-            var exceptionMessage = "File not found";
-            _mockFileStorage.Setup(fs => fs.GetFileAsync(expectedName, false)).ThrowsAsync(new Exception(exceptionMessage));
-
-            var exception = await Assert.ThrowsAsync<Exception>(() => _videoService.GetSubFile(videoId, fileName));
-
-            exception.Message.Should().Be(exceptionMessage);
-            _mockLogger.Verify(logger => logger.LogError(It.IsAny<string>()), Times.Once);
         }
     }
 }

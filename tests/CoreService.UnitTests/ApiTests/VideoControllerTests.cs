@@ -83,49 +83,5 @@ namespace CoreService.UnitTests.ApiTests
             actionResult.Should().BeOfType<UnauthorizedObjectResult>();
             _mockVideoService.Verify(service => service.AddVideo(It.IsAny<VideoUploadDto>()), Times.Never);
         }
-        
-        [Fact]
-        public async Task GetMasterPlaylist_WhenPlaylistExists_ShouldReturnFileResultWithCorrectContentType()
-        {
-            var videoId = Guid.NewGuid();
-            var playlistStream = new MemoryStream();
-            _mockVideoService.Setup(service => service.GetMasterPlaylist(videoId))
-                .ReturnsAsync(playlistStream);
-
-            var actionResult = await _controller.GetMasterPlaylist(videoId);
-            
-            actionResult.Should().BeOfType<FileStreamResult>()
-                .Which.ContentType.Should().Be("application/vnd.apple.mpegurl");
-        }
-        
-        [Fact]
-        public async Task GetSubFile_WhenPlaylistExists_ShouldReturnFileResultWithCorrectContentType()
-        {
-            var videoId = Guid.NewGuid();
-            var fileName = "playlist.m3u8";
-            var playlistStream = new MemoryStream();
-            _mockVideoService.Setup(service => service.GetSubFile(videoId, fileName))
-                .ReturnsAsync(playlistStream);
-
-            var actionResult = await _controller.GetSubFile(videoId, fileName);
-            
-            actionResult.Should().BeOfType<FileStreamResult>()
-                .Which.ContentType.Should().Be("application/vnd.apple.mpegurl");
-        }
-
-        [Fact]
-        public async Task GetSubFile_WhenSegmentExists_ShouldReturnFileResultWithCorrectContentType()
-        {
-            var videoId = Guid.NewGuid();
-            var segmentName = "segment.ts";
-            var segmentStream = new MemoryStream();
-            _mockVideoService.Setup(service => service.GetSubFile(videoId, segmentName))
-                .ReturnsAsync(segmentStream);
-
-            var actionResult = await _controller.GetSubFile(videoId, segmentName);
-
-            actionResult.Should().BeOfType<FileStreamResult>()
-                .Which.ContentType.Should().Be("video/MP2T");
-        }
     }
 }

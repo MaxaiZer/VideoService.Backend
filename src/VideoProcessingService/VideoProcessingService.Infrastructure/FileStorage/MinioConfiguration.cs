@@ -16,4 +16,6 @@ public class MinioConfiguration
     public string BucketName { get; init; }
     [Required] 
     public string TmpFolder { get; init; }
+    [Required] 
+    public string PublicFolder { get; init; }
 }

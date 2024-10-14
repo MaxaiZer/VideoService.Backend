@@ -18,28 +18,6 @@ namespace CoreService.Infrastructure.FileStorage
             _config = minioConfiguration.Value;
         }
 
-        public async Task<Stream> GetFileAsync(string name, bool isTemporary = false)
-        {
-            Stream stream = new MemoryStream();
-
-            var args = new GetObjectArgs()
-                .WithObject((isTemporary ? $"{_config.TmpFolder}/" : "") + name)
-                .WithBucket(_config.BucketName)
-                .WithCallbackStream(async (str, cancellationToken) => 
-                    await str.CopyToAsync(stream, cancellationToken));
-            
-            try
-            {
-                await _client.GetObjectAsync(args);
-                stream.Position = 0;
-            }
-            catch (ObjectNotFoundException ex)
-            {
-                throw new NotFoundException("Object name: " + name + " " + ex);
-            }
-            return stream;
-        }
-
         public async Task<string> GeneratePutUrlForTempFile(string fileName)
         {
             var args = new PresignedPutObjectArgs()

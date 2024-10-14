@@ -54,7 +54,7 @@ namespace VideoProcessingService.UnitTests.CoreTests
             _mockVideoConverter.Setup(vc => vc.ConvertAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync(conversionResult);
             _mockFileStorage.Setup(fs => fs.GetFileAsync(videoId, true)).ReturnsAsync(new MemoryStream());
-            _mockFileStorage.Setup(fs => fs.PutFileAsync(It.IsAny<string>(), It.IsAny<Stream>())).Returns(Task.CompletedTask);
+            _mockFileStorage.Setup(fs => fs.PutFileAsync(It.IsAny<string>(), It.IsAny<Stream>(), true)).Returns(Task.CompletedTask);
             _mockUnitOfWork.Setup(x => x.VideoProcessingRequests.GetById(requestId)).ReturnsAsync(request);
             _mockUnitOfWork.Setup(x => x.VideoProcessingRequests.UpdateStatus(requestId, 
                 It.IsAny<VideoProcessingRequest.ProcessingStatus>())).ReturnsAsync(true);
@@ -69,7 +69,7 @@ namespace VideoProcessingService.UnitTests.CoreTests
             await _videoProcessingService.ProcessAndStoreVideoAsync(message);
 
             string targetPlaylistName = StorageFileNamingHelper.GetNameForVideoMasterPlaylist(request.VideoId);
-            _mockFileStorage.Verify(fs => fs.PutFileAsync(targetPlaylistName, It.IsAny<Stream>()), Times.Once);
+            _mockFileStorage.Verify(fs => fs.PutFileAsync(targetPlaylistName, It.IsAny<Stream>(), true), Times.Once);
         }
 
         [Fact]
@@ -84,7 +84,7 @@ namespace VideoProcessingService.UnitTests.CoreTests
                 string targetFileName = StorageFileNamingHelper.GetNameForVideoSubFile(request.VideoId,
                     Path.GetFileName(subfile));
                 
-                _mockFileStorage.Verify(fs => fs.PutFileAsync(targetFileName, It.IsAny<Stream>()), Times.Once);
+                _mockFileStorage.Verify(fs => fs.PutFileAsync(targetFileName, It.IsAny<Stream>(), true), Times.Once);
             }
         }
 
