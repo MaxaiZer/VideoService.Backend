@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Text;
 using Microsoft.Extensions.Configuration;
 
 namespace VideoProcessingService.Infrastructure.Video;
@@ -51,12 +52,15 @@ public class MediaProcessor
         process.StartInfo = processStartInfo;
         process.OutputDataReceived += (sender, args) => Console.WriteLine(args.Data);
             
-        string errors = "";
+        var errors = new StringBuilder();
             
         process.ErrorDataReceived += (sender, args) =>
         {
-            Console.WriteLine(args.Data);
-            errors += args.Data;
+            if (args.Data != null)
+            {
+                Console.WriteLine(args.Data);
+                errors.AppendLine(args.Data);
+            }
         };
             
         process.Start();
@@ -65,8 +69,9 @@ public class MediaProcessor
         process.BeginErrorReadLine();
             
         await process.WaitForExitAsync();
+        process.WaitForExit(); //WaitForExitAsync doesn't wait for redirected output to complete!
             
         if (process.ExitCode != 0) //don't use errors.Length != 0, ffmpeg logs all in error
-            throw new Exception(errors);
+            throw new Exception(errors.ToString());
     }
 }
