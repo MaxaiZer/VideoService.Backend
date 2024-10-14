@@ -112,7 +112,9 @@ namespace CoreService.IntegrationTests.Tests
             }
             catch (HttpRequestException ex)
             {
-                throw new HttpRequestException($"The request to {uploadUrlResult.Url} failed: {ex.Message}", ex);
+                throw new HttpRequestException($"The request to {uploadUrlResult.Url} failed with " +
+                                               $"content {uploadFileResponse.Content.ReadAsStringAsync()} " +
+                                               $"and message: {ex.Message}", ex);
             }
             
             var uploadDataResponse = await UploadVideoInfo(
