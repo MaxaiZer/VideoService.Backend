@@ -74,7 +74,7 @@ namespace CoreService.IntegrationTests.Tools
             var secretKey = configuration.GetSection("MinIO")["SecretKey"] ?? throw new Exception("SecretKey is null");
             var bucketName = configuration.GetSection("MinIO")["BucketName"] ?? throw new Exception("BucketName is null");
             var tmpFolder = configuration.GetSection("MinIO")["TmpFolder"] ?? throw new Exception("TmpFolder is null");
-            
+         
             _containers.Add(new ContainerBuilder()
                 .WithImage("minio/minio:latest")
                 .WithEntrypoint("/bin/sh", "/usr/local/bin/minio-setup.sh")
@@ -83,6 +83,7 @@ namespace CoreService.IntegrationTests.Tools
                 .WithEnvironment("MINIO_ROOT_PASSWORD", secretKey)
                 .WithEnvironment("BUCKET_NAME", bucketName)
                 .WithEnvironment("TMP_FOLDER", tmpFolder)
+                .WithEnvironment("PUBLIC_FOLDER", "videos")
                 .WithPortBinding(9000)
                 .WithPortBinding(9001)
                 .WithResourceMapping(scriptSourcePath, "/usr/local/bin")
