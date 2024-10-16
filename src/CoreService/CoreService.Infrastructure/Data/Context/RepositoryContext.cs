@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Domain.Entities;
 using CoreService.Infrastructure.Identity;
+using MassTransit;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace CoreService.Infrastructure.Data.Context
@@ -17,6 +18,8 @@ namespace CoreService.Infrastructure.Data.Context
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
+            base.OnModelCreating(builder);
+            
             builder.Entity<VideoProcessingRequest>()
                 .Property(v => v.Status)
                 .HasConversion(
@@ -30,8 +33,9 @@ namespace CoreService.Infrastructure.Data.Context
                 .HasFilter($"\"{nameof(Video.Processed)}\" = true")
                 .HasMethod("gin")
                 .HasOperators("gin_trgm_ops");
-            
-            base.OnModelCreating(builder);
+           
+           builder.AddOutboxStateEntity();
+           builder.AddOutboxMessageEntity();
         }
     }
 }

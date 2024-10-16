@@ -43,10 +43,10 @@ namespace CoreService.Application.Services
                 _unitOfWork.VideoProcessingRequests.Create(request);
                 _unitOfWork.Videos.Create(video);
                 
+                await _eventBus.PublishAsync(new VideoReadyForProcessing { RequestId = request.Id});
+                
                 _unitOfWork.Save();
                 _unitOfWork.CommitTransaction();
-                
-                await _eventBus.PublishAsync(new VideoReadyForProcessing { RequestId = request.Id});
             }
             catch (Exception ex)
             {
@@ -60,6 +60,7 @@ namespace CoreService.Application.Services
 
         public async Task<ViewableVideoMetadata?> GetVideoMetadata(string id, CancellationToken cancellationToken = default)
         {
+            _logger.LogError($"Get video with id: {id}");
             return await _unitOfWork.Videos.FindViewableByIdAsync(id, cancellationToken);
         }
 
