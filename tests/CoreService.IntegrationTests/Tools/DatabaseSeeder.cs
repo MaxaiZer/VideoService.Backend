@@ -2,6 +2,7 @@ using System.Security.Claims;
 using CoreService.Application.Interfaces;
 using CoreService.Infrastructure.Data.Context;
 using CoreService.Infrastructure.Identity;
+using Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 
 namespace CoreService.IntegrationTests.Tools;
@@ -11,6 +12,9 @@ public class DatabaseSeeder
     public static List<TestUserData> existingUsersWithActiveTokens = new();
     public static TestUserData existingUserWithExpiredToken;
     public static TestUserData existingUserForTokenRevoke;
+
+    public static Video processedVideo;
+    public static Video notProcessedVideo;
 
     private readonly RepositoryContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
@@ -31,6 +35,15 @@ public class DatabaseSeeder
         existingUsersWithActiveTokens.Add(await AddUser("kook", "qwerty", withExpiredToken: false));
         existingUserWithExpiredToken = await AddUser("pook", "qwerty", withExpiredToken: true);
         existingUserForTokenRevoke = await AddUser("sook", "qwerty", withExpiredToken: false);
+        
+        if (_context.Videos.Any()) return;
+
+        processedVideo = new Video("1", "Temp", existingUsersWithActiveTokens[0].Id, "description", true);
+        notProcessedVideo = new Video("2", "Temp", existingUsersWithActiveTokens[0].Id, "description", false);
+        
+        _context.Videos.Add(processedVideo);
+        _context.Videos.Add(notProcessedVideo);
+        await _context.SaveChangesAsync();
     }
 
     private async Task<TestUserData> AddUser(string name, string password, bool withExpiredToken)
@@ -44,6 +57,7 @@ public class DatabaseSeeder
         var userId = Guid.NewGuid().ToString();
 
         var testUser = new TestUserData(
+            Id: userId,
             Name: name, 
             Password: password, 
             RefreshToken: token.RefreshToken,

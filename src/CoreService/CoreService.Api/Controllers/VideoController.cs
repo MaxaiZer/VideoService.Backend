@@ -59,6 +59,7 @@ namespace CoreService.Api.Controllers
         /// <returns>HTTP 200 status code with video metadata if the video exists.</returns>
         /// <response code="200">Videos metadata retrieved successfully.</response>
         /// <response code="204">Videos not found.</response>
+        [HttpGet]
         public async Task<IActionResult> GetMetadata([FromQuery]VideoParameters parameters, CancellationToken cancellationToken)
         {
             var videos = await _videoService.GetVideosMetadata(parameters, cancellationToken);

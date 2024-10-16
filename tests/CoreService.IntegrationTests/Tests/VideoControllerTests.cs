@@ -1,10 +1,11 @@
 using CoreService.Application.Dto;
-//using Minio.Exceptions;
 using Newtonsoft.Json;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text;
 using CoreService.IntegrationTests.Tools;
+using Domain.Entities;
 using FluentAssertions;
 
 namespace CoreService.IntegrationTests.Tests
@@ -24,8 +25,42 @@ namespace CoreService.IntegrationTests.Tests
         public async Task GetUploadUrl_WhenUnauthorizedUser_ShouldReturnUnauthorized()
         {
             var response = await _client.GetAsync($"{_baseUrl}/upload-url");
-            
             response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        }
+        
+        [Fact]
+        public async Task GetVideoMetadata_WhenVideoDoesntExist_ShouldReturn404()
+        {
+            var response = await _client.GetAsync($"{_baseUrl}/12345");
+            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
+        
+        [Fact]
+        public async Task GetVideoMetadata_WhenVideoNotProcessed_ShouldReturn404()
+        {
+            var response = await _client.GetAsync($"{_baseUrl}/{DatabaseSeeder.notProcessedVideo.Id}");
+            response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        }
+        
+        [Fact]
+        public async Task GetVideoMetadata_WhenVideoProcessed_ShouldBeSuccessful()
+        {
+            var response = await _client.GetAsync($"{_baseUrl}/{DatabaseSeeder.processedVideo.Id}");
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            
+            var viewableVideo = await response.Content.ReadFromJsonAsync<ViewableVideoMetadata>();
+            viewableVideo.Should().NotBeNull();
+        }
+        
+        [Fact]
+        public async Task GetVideosMetadata_WhenVideoProcessed_ShouldBeSuccessful()
+        {
+            var response = await _client.GetAsync($"{_baseUrl}");
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            
+            var viewableVideos = await response.Content.ReadFromJsonAsync<List<ViewableVideoMetadata>>();
+            viewableVideos.Should().NotBeNull();
+            viewableVideos.Should().NotBeEmpty();
         }
         
         [Fact]
