@@ -48,8 +48,11 @@ public static class DependencyInjection
 
         services.AddMassTransit(x =>
         {
-            x.AddEntityFrameworkOutbox<RepositoryContext>(o => 
-                o.UsePostgres().UseBusOutbox()
+            x.AddEntityFrameworkOutbox<RepositoryContext>(o =>
+                {
+                    o.UsePostgres().UseBusOutbox();
+                    o.DisableInboxCleanupService();
+                }
             );
             
             x.SetEndpointNameFormatter(new KebabCaseEndpointNameFormatter(includeNamespace: false));
