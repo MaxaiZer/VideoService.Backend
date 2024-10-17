@@ -10,6 +10,7 @@ namespace VideoProcessingService.IntegrationTests.Tools
 
         private readonly string _ffmpegArchivePath = Path.Combine(Path.GetTempPath(), "ffmpeg_archive");
         private readonly string _ffmpegDirPath = Path.Combine(Path.GetTempPath(), "ffmpeg");
+        private bool _disposed;
 
         public FFmpegFixture()
         {
@@ -93,10 +94,18 @@ namespace VideoProcessingService.IntegrationTests.Tools
 
         public void Dispose()
         {
-            if (deleteFFmpegOnDispose)
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            if (disposing && deleteFFmpegOnDispose)
             {
                 File.Delete(_ffmpegArchivePath);
                 Directory.Delete(_ffmpegDirPath, true);
+                _disposed = true;
             }
         }
     }

@@ -10,9 +10,11 @@ namespace CoreService.Infrastructure.Data.Repositories
         private readonly RepositoryContext _context;
         private IDbContextTransaction? _transaction;
         
+        private bool _disposed;
+        
         public UnitOfWork(RepositoryContext context)
         {
-            this._context = context;
+            _context = context;
         }
 
         public IVideoRepository Videos => new VideoRepository(_context);
@@ -52,7 +54,20 @@ namespace CoreService.Infrastructure.Data.Repositories
         }
         public void Dispose()
         {
-            _context.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        
+        protected virtual void Dispose(bool disposing)
+        {
+            if (_disposed) return;
+            
+            if (disposing)
+            {
+                _context.Dispose();
+                _transaction?.Dispose();
+                _disposed = true;
+            }
         }
     }
 }

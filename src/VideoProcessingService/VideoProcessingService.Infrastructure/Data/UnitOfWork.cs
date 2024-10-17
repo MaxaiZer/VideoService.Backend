@@ -10,13 +10,15 @@ public class UnitOfWork: IUnitOfWork
     private readonly IDbConnection _connection;
     private IDbTransaction? _transaction;
 
+    private bool _disposed;
+
     public IVideoProcessingRequestRepository VideoProcessingRequests { get; }
     public IVideoRepository Videos { get; }
 
     public UnitOfWork(IConfiguration configuration)
     {
-        _connection = new NpgsqlConnection(configuration["DB_CONNECTION_STRING"])
-                                           ?? throw new Exception("Can't find a connection string");
+        _connection = new NpgsqlConnection(configuration["DB_CONNECTION_STRING"] ?? 
+                                           throw new InvalidOperationException("DB connection string is missing in configuration"));
         VideoProcessingRequests = new VideoProcessingRequestRepository(_connection);
         Videos = new VideoRepository(_connection);
     }
@@ -52,8 +54,19 @@ public class UnitOfWork: IUnitOfWork
 
     public void Dispose()
     {
-        _connection.Dispose();
-        _transaction?.Dispose();
+        Dispose(true);
         GC.SuppressFinalize(this);
+    }
+    
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_disposed) return;
+        
+        if (disposing)
+        {
+            _connection.Dispose();
+            _transaction?.Dispose();
+            _disposed = true;
+        }
     }
 }
