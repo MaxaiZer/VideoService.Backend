@@ -4,6 +4,6 @@ namespace VideoProcessingService.Core.Interfaces
 {
     public interface IVideoProcessingService
     {
-        public Task ProcessAndStoreVideoAsync(VideoReadyForProcessing request);
+        public Task ProcessAndStoreVideoAsync(VideoReadyForProcessing message);
     }
 }

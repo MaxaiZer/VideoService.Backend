@@ -137,7 +137,7 @@ namespace CoreService.UnitTests.ApplicationTests
             _identityServiceMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(Result.Failure(["error!"]));
 
             // Act & Assert
-            await _authService.Invoking(a => a.CreateTokens(user)).Should().ThrowAsync<Exception>();
+            await _authService.Invoking(a => a.CreateTokens(user)).Should().ThrowAsync<CreateTokenException>();
         }
 
         [Fact]
@@ -154,7 +154,7 @@ namespace CoreService.UnitTests.ApplicationTests
             var tokenPair = new TokenPair(tokenDto.AccessToken, "refreshToken");
             
             // Act & Assert
-            await Assert.ThrowsAsync<RefreshTokenBadRequest>(() => _authService.RefreshAccessToken(tokenPair));
+            await Assert.ThrowsAsync<RefreshTokenException>(() => _authService.RefreshAccessToken(tokenPair));
         }
         
         [Fact]
@@ -171,7 +171,7 @@ namespace CoreService.UnitTests.ApplicationTests
             var tokenPair = new TokenPair(tokenDto.AccessToken, "refreshToken");
 
             // Act & Assert
-            await Assert.ThrowsAsync<RefreshTokenBadRequest>(() => _authService.RefreshAccessToken(tokenPair));
+            await Assert.ThrowsAsync<RefreshTokenException>(() => _authService.RefreshAccessToken(tokenPair));
         }
 
         [Fact]

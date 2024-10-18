@@ -8,7 +8,7 @@ namespace CoreService.Infrastructure.Data.Repositories
     public abstract class RepositoryBase<T> : IRepositoryBase<T> where T : class
     {
         protected RepositoryContext context;
-        public RepositoryBase(RepositoryContext repositoryContext)
+        protected RepositoryBase(RepositoryContext repositoryContext)
         {
             context = repositoryContext;
         }

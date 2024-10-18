@@ -4,6 +4,6 @@ namespace VideoProcessingService.Core.Interfaces
 {
     public interface IVideoConverter
     {
-        Task<ConversionResult> ConvertAsync(string inputFileFullPath, string outputDirectory);
+        Task<ConversionResult> ConvertAsync(string inputFilePath, string outputDirectory);
     }
 }

@@ -71,7 +71,7 @@ namespace CoreService.IntegrationTests.Tests
                 {
                     Name = "rabbit",
                     Description = "rabbit",
-                    UploadedVideoId = "filename"
+                    VideoFileId = "filename"
                 });
             
             response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -96,41 +96,6 @@ namespace CoreService.IntegrationTests.Tests
             }
         }
        
-       /* [Fact]
-        public async Task GetMasterPlaylist_WhenVideoUploaded_ShouldReturnValidPlaylist()
-        {
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", DatabaseSeeder.existingUserWithActiveToken.AccessToken);
-            string videoId = await UploadVideoAndData("TestData/rabbit320.mp4");
-            
-            var getPlaylistResponse = await _client.GetAsync($"{_baseUrl}/{videoId}/file/master-playlist");
-            getPlaylistResponse.EnsureSuccessStatusCode();
-            
-            var playlistContent = await getPlaylistResponse.Content.ReadAsStringAsync();
-            await TryParseMasterPlaylist(playlistContent, $"{_baseUrl}/{videoId}");
-        }
-*/
-    /*    async Task TryParseMasterPlaylist(string masterPlaylistContent, string baseUrl)
-        {
-            var playlistUrl = HlsParser.ExtractFirstPlaylistUrl(masterPlaylistContent);
-            var playlistFullUrl = baseUrl + "/" + playlistUrl;
-            var getPlaylistResponse = await _client.GetAsync(playlistFullUrl);
-            if (!getPlaylistResponse.IsSuccessStatusCode)
-            {
-                throw new HttpRequestException("Failed to fetch playlist by url: " + baseUrl + "/" + playlistUrl + 
-                                               " with status code " + getPlaylistResponse.StatusCode);
-            }
-            
-            var playlistContent = await getPlaylistResponse.Content.ReadAsStringAsync();
-            
-            var segmentUrl = HlsParser.ExtractFirstSegmentUrl(playlistContent);
-            var getSegmentResponse = await _client.GetAsync(playlistFullUrl.RemoveLastSegmentInUrl() + segmentUrl);
-            if (!getSegmentResponse.IsSuccessStatusCode)
-            {
-                throw new HttpRequestException("Failed to fetch segment by url: " + baseUrl + "/" + segmentUrl + 
-                                               " with status code " + getSegmentResponse.StatusCode);
-            }
-        }
-        */
         async Task<string> UploadVideoAndInfo(string videoFilePath)
         {
             var getUrlResponse = await _client.GetAsync($"{_baseUrl}/upload-url");
@@ -157,11 +122,11 @@ namespace CoreService.IntegrationTests.Tests
                 {
                     Name = "rabbit",
                     Description = "rabbit",
-                    UploadedVideoId = uploadUrlResult.FileName
+                    VideoFileId = uploadUrlResult.FileId
                 });
             uploadDataResponse.EnsureSuccessStatusCode();
 
-            return uploadUrlResult.FileName;
+            return uploadUrlResult.FileId;
         }
         
         async Task<HttpResponseMessage> UploadVideoFile(string filePath, string putUrl, bool useOwnHttpClient)

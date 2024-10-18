@@ -2,9 +2,9 @@
 
 namespace CoreService.Application.Common.Exceptions
 {
-    public class RefreshTokenBadRequest : BadRequestException
+    public class RefreshTokenException : BadRequestException
     {
-        public RefreshTokenBadRequest()
+        public RefreshTokenException()
             : base($"Invalid refresh token request. Access or refresh token is invalid.")
         {
         }

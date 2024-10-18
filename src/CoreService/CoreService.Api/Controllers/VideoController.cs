@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using CoreService.Application.Common.Models;
 using CoreService.Application.Dto;
 using CoreService.Application.Interfaces.Services;
 using Microsoft.AspNetCore.Authorization;
@@ -45,10 +46,11 @@ namespace CoreService.Api.Controllers
             var userId = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
                 return Unauthorized("User authentication required.");
+
+            var parameters = new VideoUploadParameters(Name: videoUploadDto.Name, UserId: userId,
+                Description: videoUploadDto.Description, VideoFileId: videoUploadDto.VideoFileId);
             
-            videoUploadDto.UserId = userId;
-            
-            await _videoService.AddVideo(videoUploadDto);
+            await _videoService.AddVideo(parameters);
             return Ok();
         }
 

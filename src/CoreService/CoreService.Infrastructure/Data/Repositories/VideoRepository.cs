@@ -14,7 +14,7 @@ namespace CoreService.Infrastructure.Data.Repositories
         public async Task<ViewableVideoMetadata?> FindViewableByIdAsync(string id,
             CancellationToken cancellationToken = default)
         {
-            return await context.Videos.Where(video => video.Processed == true)
+            return await context.Videos.Where(video => video.Processed)
                 .Where(video => video.Id == id)
                 .Join(context.Users,
                     video => video.UserId,
@@ -35,7 +35,7 @@ namespace CoreService.Infrastructure.Data.Repositories
         {
             var minSimilarityThreshold = 0.1;
 
-            var query = context.Videos.Where(video => video.Processed == true);
+            var query = context.Videos.Where(video => video.Processed);
             if (!string.IsNullOrWhiteSpace(searchQuery))
             {
                 query = query

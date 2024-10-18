@@ -1,9 +1,7 @@
 ﻿using CoreService.Application.Interfaces;
-using Domain.Exceptions;
 using Microsoft.Extensions.Options;
 using Minio;
 using Minio.DataModel.Args;
-using Minio.Exceptions;
 
 namespace CoreService.Infrastructure.FileStorage
 {

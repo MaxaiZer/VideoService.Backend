@@ -16,6 +16,8 @@ namespace CoreService.Api.Controllers
         private readonly IAuthService _authService;
         private readonly JwtConfiguration _jwtConfig;
         
+        private const string refreshTokenCookie = "refreshToken";
+        
         public AuthController(IAuthService service, IOptions<JwtConfiguration> jwtConfig)
         {
             _authService = service;
@@ -58,7 +60,7 @@ namespace CoreService.Api.Controllers
             
             var tokenPair = await _authService.CreateTokens(user);
             
-            HttpContext.Response.Cookies.Append("refreshToken", tokenPair.RefreshToken, GetRefreshTokenCookieOptions());
+            HttpContext.Response.Cookies.Append(refreshTokenCookie, tokenPair.RefreshToken, GetRefreshTokenCookieOptions());
             return Ok(new AccessTokenDto(tokenPair.AccessToken));
         }
         /// <summary>
@@ -71,7 +73,7 @@ namespace CoreService.Api.Controllers
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh([FromBody] AccessTokenDto tokenDto)
         {
-            var refreshToken = HttpContext.Request.Cookies["refreshToken"];
+            var refreshToken = HttpContext.Request.Cookies[refreshTokenCookie];
             if (string.IsNullOrEmpty(refreshToken))
             {
                 return BadRequest("Refresh token is missing.");
@@ -80,7 +82,7 @@ namespace CoreService.Api.Controllers
             var tokenPair = new TokenPair(tokenDto.AccessToken, refreshToken);
             tokenPair = await _authService.RefreshAccessToken(tokenPair);
             
-            HttpContext.Response.Cookies.Append("refreshToken", tokenPair.RefreshToken, GetRefreshTokenCookieOptions());
+            HttpContext.Response.Cookies.Append(refreshTokenCookie, tokenPair.RefreshToken, GetRefreshTokenCookieOptions());
             return Ok(new AccessTokenDto(tokenPair.AccessToken));
         }
         
@@ -99,7 +101,7 @@ namespace CoreService.Api.Controllers
                 return Unauthorized("User authentication required.");
             
             await _authService.RevokeRefreshToken(userId);
-            Response.Cookies.Delete("refreshToken");
+            Response.Cookies.Delete(refreshTokenCookie);
             return Ok();
         }
         

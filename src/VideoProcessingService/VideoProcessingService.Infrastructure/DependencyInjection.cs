@@ -86,8 +86,7 @@ public static class DependencyInjection
     {
         var nlogConfigPath = configuration["Logging:NLog:ConfigPath"];
         if (string.IsNullOrEmpty(nlogConfigPath))
-            throw new ArgumentNullException(nameof(nlogConfigPath),
-                "NLog configuration path is missing in configuration.");
+            throw new InvalidOperationException("NLog configuration path is missing in configuration.");
 
         var fullPath = Path.Combine(Directory.GetCurrentDirectory(), nlogConfigPath);
         if (!File.Exists(fullPath))

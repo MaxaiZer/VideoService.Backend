@@ -106,7 +106,7 @@ public static class DependencyInjection
     {
         var nlogConfigPath = configuration["Logging:NLog:ConfigPath"];
         if (string.IsNullOrEmpty(nlogConfigPath))
-            throw new ArgumentNullException(nameof(nlogConfigPath), "NLog configuration path is missing in configuration.");
+            throw new InvalidOperationException("NLog configuration path is missing in configuration.");
         
         var fullPath = Path.Combine(Directory.GetCurrentDirectory(), nlogConfigPath);
         if (!File.Exists(fullPath))
@@ -122,7 +122,7 @@ public static class DependencyInjection
     {
         var connectionString = configuration["DB_CONNECTION_STRING"];
         if (string.IsNullOrEmpty(connectionString))
-            throw new ArgumentNullException(nameof(connectionString), "PostgreSQL connection string is missing.");
+            throw new InvalidOperationException("DB connection string is missing in configuration.");
         
         services.AddDbContext<RepositoryContext>(opts =>
             opts.UseNpgsql(connectionString));
@@ -135,13 +135,6 @@ public static class DependencyInjection
     {
         services.AddIdentity<ApplicationUser, IdentityRole>(options =>
             {
-                /*
-                 options.Password.RequireDigit = true;
-                  options.Password.RequireLowercase = true;
-                  options.Password.RequireUppercase = true;
-                  options.Password.RequireNonAlphanumeric = false;
-                  options.Password.RequiredLength = 6;
-                  */
                 options.Password.RequireDigit = false;
                 options.Password.RequireLowercase = false;
                 options.Password.RequireUppercase = false;

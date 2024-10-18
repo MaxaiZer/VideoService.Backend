@@ -1,8 +1,8 @@
-﻿using Domain.Entities;
+﻿using CoreService.Application.Common.Models;
+using Domain.Entities;
 using CoreService.Application.Dto;
 using CoreService.Application.Interfaces;
 using CoreService.Application.Interfaces.Services;
-using Shared.Helpers;
 using Shared.Messages;
 
 namespace CoreService.Application.Services
@@ -23,20 +23,13 @@ namespace CoreService.Application.Services
             _eventBus = eventBus;
         }
 
-        public async Task AddVideo(VideoUploadDto videoUploadDto)
+        public async Task AddVideo(VideoUploadParameters videoUpload)
         {
-            if (string.IsNullOrEmpty(videoUploadDto.UserId))
-            {
-                var message = $"{nameof(AddVideo)}: UserId was not populated is videoUploadDto";
-                _logger.LogError(message);
-                throw new Exception(message);
-            }
-
             try
             {
-                var request = new VideoProcessingRequest(Guid.NewGuid().ToString(), videoUploadDto.UploadedVideoId, 
+                var request = new VideoProcessingRequest(Guid.NewGuid().ToString(), videoUpload.VideoFileId, 
                     VideoProcessingRequest.ProcessingStatus.Appending);
-                var video = new Video(videoUploadDto.UploadedVideoId, videoUploadDto.Name, videoUploadDto.UserId, videoUploadDto.Description);
+                var video = new Video(videoUpload.VideoFileId, videoUpload.Name, videoUpload.UserId, videoUpload.Description);
                 
                 _unitOfWork.BeginTransaction();
                 

@@ -33,8 +33,8 @@ public class ConverterTests: IClassFixture<FFmpegFixture>
             result = await videoConverter.ConvertAsync(filePath, tmpDirectory);
             result.Should().NotBeNull();
 
-            string masterPlaylistContent = File.ReadAllText(result.IndexFilePath);
-            string playlistContent = File.ReadAllText(result.SubFilesPaths.First(f => f.EndsWith(".m3u8")));
+            string masterPlaylistContent = await File.ReadAllTextAsync(result.IndexFilePath);
+            string playlistContent = await File.ReadAllTextAsync(result.SubFilesPaths.First(f => f.EndsWith(".m3u8")));
         
             HlsParser.ExtractFirstPlaylistUrl(masterPlaylistContent).Should().NotBeNullOrEmpty();
             HlsParser.ExtractFirstSegmentUrl(playlistContent).Should().NotBeNullOrEmpty();

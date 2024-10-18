@@ -1,11 +1,12 @@
-﻿using CoreService.Application.Dto;
+﻿using CoreService.Application.Common.Models;
+using CoreService.Application.Dto;
 using Domain.Entities;
 
 namespace CoreService.Application.Interfaces.Services
 {
     public interface IVideoService
     {
-        public Task AddVideo(VideoUploadDto videoUploadDto);
+        public Task AddVideo(VideoUploadParameters videoUpload);
         
         public Task<ViewableVideoMetadata?> GetVideoMetadata(string id, CancellationToken cancellationToken = default);
         

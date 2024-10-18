@@ -57,7 +57,7 @@ namespace CoreService.Application.Services
             var error = $"{nameof(CreateTokens)}: error update user: {errorMessages}";
             _logger.LogError(error);
                 
-            throw new Exception(error);
+            throw new CreateTokenException(error);
         }
 
         public async Task<TokenPair> RefreshAccessToken(TokenPair tokenDto)
@@ -70,7 +70,7 @@ namespace CoreService.Application.Services
             }
             catch (Exception e)
             {
-                throw new RefreshTokenBadRequest();
+                throw new RefreshTokenException();
             }
 
             var id = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
@@ -78,7 +78,7 @@ namespace CoreService.Application.Services
             
             if (user == null || user.RefreshToken != tokenDto.RefreshToken ||
                 user.RefreshTokenExpiryTime <= DateTimeOffset.Now)
-                throw new RefreshTokenBadRequest();
+                throw new RefreshTokenException();
 
             var accessToken = _jwtService.CreateAccessToken(claims: []);
             return tokenDto with { AccessToken = accessToken };

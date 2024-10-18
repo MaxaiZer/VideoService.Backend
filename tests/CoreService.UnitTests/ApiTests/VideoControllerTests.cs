@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using CoreService.Api.Controllers;
+using CoreService.Application.Common.Models;
 using CoreService.Application.Dto;
 using CoreService.Application.Interfaces.Services;
 using FluentAssertions;
@@ -49,7 +50,7 @@ namespace CoreService.UnitTests.ApiTests
             {
                 Name = "Test Video",
                 Description = "Test Description",
-                UploadedVideoId = "test.mp4"
+                VideoFileId = "test.mp4"
             };
 
             ControllerContext originalContext = _controller.ControllerContext;
@@ -64,8 +65,7 @@ namespace CoreService.UnitTests.ApiTests
             _controller.ControllerContext = originalContext;
 
             actionResult.Should().BeOfType<OkResult>();
-            _mockVideoService.Verify(service => service.AddVideo(It.IsAny<VideoUploadDto>()), Times.Once);
-            videoUploadDto.UserId.Should().NotBeNullOrEmpty();
+            _mockVideoService.Verify(service => service.AddVideo(It.IsAny<VideoUploadParameters>()), Times.Once);
         }
 
         [Fact]
@@ -75,13 +75,13 @@ namespace CoreService.UnitTests.ApiTests
             { 
                 Name = "Test Video",
                 Description = "Test Description",
-                UploadedVideoId = "test.mp4"
+                VideoFileId = "test.mp4"
             };
             
             var actionResult = await _controller.Upload(videoUploadDto);
 
             actionResult.Should().BeOfType<UnauthorizedObjectResult>();
-            _mockVideoService.Verify(service => service.AddVideo(It.IsAny<VideoUploadDto>()), Times.Never);
+            _mockVideoService.Verify(service => service.AddVideo(It.IsAny<VideoUploadParameters>()), Times.Never);
         }
     }
 }
