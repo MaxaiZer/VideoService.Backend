@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using CoreService.Application.Common.Exceptions;
+using CoreService.Application.Common.Helpers;
 using CoreService.Application.Common.Models;
 using CoreService.Application.Dto;
 using CoreService.Application.Interfaces;
@@ -109,19 +110,19 @@ namespace CoreService.UnitTests.ApplicationTests
             // Arrange
             var user = new ApplicationUser();
             var accessToken = "accessToken";
-            var refreshToken = new RefreshTokenResult("refreshToken", DateTimeOffset.Now.AddDays(7));
+            var refreshTokenRes = new RefreshTokenResult("refreshToken", DateTimeOffset.Now.AddDays(7));
             _jwtServiceMock.Setup(x => x.CreateAccessToken(It.IsAny<List<Claim>>())).Returns(accessToken);
-            _jwtServiceMock.Setup(x => x.CreateRefreshToken()).Returns(refreshToken);
+            _jwtServiceMock.Setup(x => x.CreateRefreshToken()).Returns(refreshTokenRes);
             _identityServiceMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(Result.Success());
 
             // Act
-            var tokenDto = await _authService.CreateTokens(user);
+            var tokenDto = await _authService.CreateTokens(user, updateRefreshExpiryTime: true);
 
             // Assert
             tokenDto.AccessToken.Should().Be(accessToken);
-            tokenDto.RefreshToken.Should().Be("refreshToken");
-            user.RefreshTokenExpiryTime.Should().Be(refreshToken.ExpiryTime);
-            user.RefreshToken.Should().Be("refreshToken");
+            tokenDto.RefreshToken.Should().Be(refreshTokenRes.RefreshToken);
+            user.RefreshTokenExpiryTime.Should().Be(refreshTokenRes.ExpiryTime);
+            user.RefreshToken.Should().Be(TokenHelper.HashToken(refreshTokenRes.RefreshToken));
         }
         
         [Fact]
@@ -137,41 +138,21 @@ namespace CoreService.UnitTests.ApplicationTests
             _identityServiceMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(Result.Failure(["error!"]));
 
             // Act & Assert
-            await _authService.Invoking(a => a.CreateTokens(user)).Should().ThrowAsync<CreateTokenException>();
+            await _authService.Invoking(a => a.CreateTokens(user, updateRefreshExpiryTime: true)).Should()
+                .ThrowAsync<CreateTokenException>();
         }
 
-        [Fact]
-        public async Task RefreshToken_WhenInvalidUser_ShouldThrowRefreshTokenBadRequest()
-        {
-            // Arrange
-            var tokenDto = new AccessTokenDto("accessToken");
-            _jwtServiceMock
-                .Setup(x => x.GetPrincipalFromToken(tokenDto.AccessToken))
-                .Returns(GetValidPrincipal(userId: Guid.NewGuid().ToString()));
-            _identityServiceMock
-                .Setup(x => x.GetUserByNameAsync(It.IsAny<string>()))
-                .ReturnsAsync((IApplicationUser?)null);
-            var tokenPair = new TokenPair(tokenDto.AccessToken, "refreshToken");
-            
-            // Act & Assert
-            await Assert.ThrowsAsync<RefreshTokenException>(() => _authService.RefreshAccessToken(tokenPair));
-        }
-        
         [Fact]
         public async Task RefreshToken_WhenInvalidToken_ShouldThrowRefreshTokenBadRequest()
         {
             // Arrange
-            var tokenDto = new AccessTokenDto("accessToken");
-            _jwtServiceMock
-                .Setup(x => x.GetPrincipalFromToken(tokenDto.AccessToken))
-                .Throws(new Exception());
             _identityServiceMock
-                .Setup(x => x.GetUserByNameAsync(It.IsAny<string>()))
+                .Setup(x => x.GetUserByRefreshTokenAsync(It.IsAny<string>()))
                 .ReturnsAsync((IApplicationUser?)null);
-            var tokenPair = new TokenPair(tokenDto.AccessToken, "refreshToken");
-
+            var refreshToken = "myRefreshToken";
+            
             // Act & Assert
-            await Assert.ThrowsAsync<RefreshTokenException>(() => _authService.RefreshAccessToken(tokenPair));
+            await Assert.ThrowsAsync<RefreshTokenException>(() => _authService.RefreshAccessToken(refreshToken));
         }
 
         [Fact]
@@ -179,26 +160,27 @@ namespace CoreService.UnitTests.ApplicationTests
         {
             // Arrange
             var refreshToken = "refreshToken";
-            var tokenDto = new AccessTokenDto("accessToken");
+            var newRefreshToken = "refreshToken";
             var user = new ApplicationUser { Id = Guid.NewGuid().ToString(), RefreshToken = refreshToken, RefreshTokenExpiryTime = DateTimeOffset.Now.AddDays(1) };
             var newAccessToken = "newAccessToken";
-
-            _jwtServiceMock
-                .Setup(x => x.GetPrincipalFromToken(tokenDto.AccessToken))
-                .Returns(GetValidPrincipal(user.Id));
+            
             _identityServiceMock
-                .Setup(x => x.GetUserByIdAsync(user.Id))
+                .Setup(x => x.GetUserByRefreshTokenAsync(TokenHelper.HashToken(refreshToken)))
                 .ReturnsAsync(user);
+            
+            _identityServiceMock
+                .Setup(x => x.UpdateUserAsync(user))
+                .ReturnsAsync(Result.Success());
+            
             _jwtServiceMock.Setup(x => x.CreateAccessToken(It.IsAny<List<Claim>>())).Returns(newAccessToken);
-            _identityServiceMock.Setup(x => x.UpdateUserAsync(user)).ReturnsAsync(Result.Success);
+            _jwtServiceMock.Setup(x => x.CreateRefreshToken()).Returns(new RefreshTokenResult(newRefreshToken, DateTimeOffset.Now));
 
             // Act
-            var newTokenDto = await _authService.RefreshAccessToken(new TokenPair(tokenDto.AccessToken, refreshToken));
+            var newTokenDto = await _authService.RefreshAccessToken(refreshToken);
 
             // Assert
             newTokenDto.AccessToken.Should().Be(newAccessToken);
-            newTokenDto.RefreshToken.Should().Be("refreshToken");
-            user.RefreshToken.Should().Be("refreshToken");
+            newTokenDto.RefreshToken.Should().Be(newRefreshToken);
         }
     }
 }

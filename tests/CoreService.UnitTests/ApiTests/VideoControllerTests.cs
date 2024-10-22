@@ -69,7 +69,7 @@ namespace CoreService.UnitTests.ApiTests
         }
 
         [Fact]
-        public async Task Upload_WhenUserIdIsMissing_ShouldReturnUnauthorized()
+        public async Task Upload_WhenUserIdIsMissing_ShouldReturn400()
         {
             var videoUploadDto = new VideoUploadDto
             { 
@@ -80,7 +80,7 @@ namespace CoreService.UnitTests.ApiTests
             
             var actionResult = await _controller.Upload(videoUploadDto);
 
-            actionResult.Should().BeOfType<UnauthorizedObjectResult>();
+            actionResult.Should().BeOfType<BadRequestObjectResult>();
             _mockVideoService.Verify(service => service.AddVideo(It.IsAny<VideoUploadParameters>()), Times.Never);
         }
     }

@@ -44,8 +44,11 @@ namespace CoreService.Api.Controllers
         public async Task<IActionResult> Upload([FromBody]VideoUploadDto videoUploadDto)
         {
             var userId = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            
             if (string.IsNullOrEmpty(userId))
-                return Unauthorized("User authentication required.");
+            {
+                return BadRequest("Missing userId claim in the token.");
+            }
 
             var parameters = new VideoUploadParameters(Name: videoUploadDto.Name, UserId: userId,
                 Description: videoUploadDto.Description, VideoFileId: videoUploadDto.VideoFileId);

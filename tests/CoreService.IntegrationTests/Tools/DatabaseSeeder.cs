@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using CoreService.Application.Common.Helpers;
 using CoreService.Application.Interfaces;
 using CoreService.Infrastructure.Data.Context;
 using CoreService.Infrastructure.Identity;
@@ -9,9 +10,8 @@ namespace CoreService.IntegrationTests.Tools;
 
 public class DatabaseSeeder
 {
-    public static List<TestUserData> existingUsersWithActiveTokens = new();
-    public static TestUserData existingUserWithExpiredToken;
-    public static TestUserData existingUserForTokenRevoke;
+    public static List<TestUserData> usersWithActiveTokens = new();
+    public static TestUserData userWithExpiredToken;
 
     public static Video processedVideo;
     public static Video notProcessedVideo;
@@ -31,15 +31,19 @@ public class DatabaseSeeder
     {
         if (_context.Users.Any()) return;
 
-        existingUsersWithActiveTokens.Add(await AddUser("rook", "qwerty", withExpiredToken: false));
-        existingUsersWithActiveTokens.Add(await AddUser("kook", "qwerty", withExpiredToken: false));
-        existingUserWithExpiredToken = await AddUser("pook", "qwerty", withExpiredToken: true);
-        existingUserForTokenRevoke = await AddUser("sook", "qwerty", withExpiredToken: false);
+        const int usersActiveTokensCount = 7;
+        for (int i = 0; i < usersActiveTokensCount; i++)
+        {
+            usersWithActiveTokens.Add(await AddUser(Guid.NewGuid().ToString()
+                .Substring(0, 8), "qwerty", withExpiredToken: false));
+        }
+
+        userWithExpiredToken = await AddUser("pook", "qwerty", withExpiredToken: true);
         
         if (_context.Videos.Any()) return;
 
-        processedVideo = new Video("1", "Temp", existingUsersWithActiveTokens[0].Id, "description", true);
-        notProcessedVideo = new Video("2", "Temp", existingUsersWithActiveTokens[0].Id, "description", false);
+        processedVideo = new Video("1", "Temp", usersWithActiveTokens[0].Id, "description", true);
+        notProcessedVideo = new Video("2", "Temp", usersWithActiveTokens[0].Id, "description", false);
         
         _context.Videos.Add(processedVideo);
         _context.Videos.Add(notProcessedVideo);
@@ -69,7 +73,7 @@ public class DatabaseSeeder
         {
             Id = userId,
             UserName = name,
-            RefreshToken = token.RefreshToken,
+            RefreshToken = TokenHelper.HashToken(token.RefreshToken),
             RefreshTokenExpiryTime = token.ExpiryTime.ToUniversalTime()
         };
  

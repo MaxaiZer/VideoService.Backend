@@ -1,5 +1,4 @@
 ﻿using System.Security.Claims;
-using CoreService.Application.Common.Models;
 using CoreService.Application.Dto;
 using CoreService.Application.Interfaces.Services;
 using CoreService.Infrastructure.Jwt;
@@ -58,7 +57,7 @@ namespace CoreService.Api.Controllers
             if (!result)
                 return Unauthorized();
             
-            var tokenPair = await _authService.CreateTokens(user);
+            var tokenPair = await _authService.CreateTokens(user, updateRefreshExpiryTime: true);
             
             HttpContext.Response.Cookies.Append(refreshTokenCookie, tokenPair.RefreshToken, GetRefreshTokenCookieOptions());
             return Ok(new AccessTokenDto(tokenPair.AccessToken));
@@ -71,7 +70,7 @@ namespace CoreService.Api.Controllers
         /// <response code="200">Access token refreshed successfully.</response>
         /// <response code="400">Token refresh failed due to invalid tokens.</response>
         [HttpPost("refresh")]
-        public async Task<IActionResult> Refresh([FromBody] AccessTokenDto tokenDto)
+        public async Task<IActionResult> Refresh()
         {
             var refreshToken = HttpContext.Request.Cookies[refreshTokenCookie];
             if (string.IsNullOrEmpty(refreshToken))
@@ -79,8 +78,7 @@ namespace CoreService.Api.Controllers
                 return BadRequest("Refresh token is missing.");
             }
             
-            var tokenPair = new TokenPair(tokenDto.AccessToken, refreshToken);
-            tokenPair = await _authService.RefreshAccessToken(tokenPair);
+            var tokenPair = await _authService.RefreshAccessToken(refreshToken);
             
             HttpContext.Response.Cookies.Append(refreshTokenCookie, tokenPair.RefreshToken, GetRefreshTokenCookieOptions());
             return Ok(new AccessTokenDto(tokenPair.AccessToken));

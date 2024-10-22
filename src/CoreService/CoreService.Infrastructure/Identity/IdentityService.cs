@@ -2,6 +2,7 @@ using CoreService.Application.Common.Models;
 using CoreService.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace CoreService.Infrastructure.Identity;
 
@@ -47,16 +48,21 @@ public class IdentityService : IIdentityService
         return result.Succeeded;
     }
 
-    public async Task<IApplicationUser?> GetUserByNameAsync(string name)
-    {
-        return await _userManager.FindByNameAsync(name);
-    }
-    
     public async Task<IApplicationUser?> GetUserByIdAsync(string id)
     {
         return await _userManager.FindByIdAsync(id);
     }
     
+    public async Task<IApplicationUser?> GetUserByNameAsync(string name)
+    {
+        return await _userManager.FindByNameAsync(name);
+    }
+    
+    public async Task<IApplicationUser?> GetUserByRefreshTokenAsync(string refreshToken)
+    {
+        return await _userManager.Users.FirstOrDefaultAsync(u => u.RefreshToken == refreshToken);
+    }
+
     public async Task<Result> DeleteUserAsync(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);

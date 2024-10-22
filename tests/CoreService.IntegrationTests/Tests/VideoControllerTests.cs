@@ -80,7 +80,7 @@ namespace CoreService.IntegrationTests.Tests
         [Fact]
         public async Task UploadVideo_WhenValidUserUploadsVideo_ShouldBeSuccessful()
         {
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", DatabaseSeeder.existingUsersWithActiveTokens[0].AccessToken);
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", DatabaseSeeder.usersWithActiveTokens[0].AccessToken);
             var tempFilePath = Path.GetTempFileName();
             
             try
