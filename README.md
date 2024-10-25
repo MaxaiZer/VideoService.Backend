@@ -17,11 +17,13 @@
 ```mermaid
 graph TD;
 subgraph Shared
-        RabbitMQ;
         MinIO;
         PostgreSQL;
     end
         CoreService --> Shared;
+        CoreService --> RabbitMQ;
+        RabbitMQ --> VideoProcessingService;
         VideoProcessingService --> Shared;
-        Nginx --> CoreService;
+        Nginx --> CoreService
+        Nginx --> MinIO
 ```
