@@ -14,13 +14,26 @@ namespace CoreService.IntegrationTests.Tools
 {
     public class TestingWebAppFactory :  WebApplicationFactory<Program>
     {
-        private static int _migrationsApplied = 0;
-
+        
         public TestingWebAppFactory()
         {
            
         }
 
+        public async Task RunMigration()
+        {
+            using var scope = Services.CreateScope();
+            
+            var dbContext = scope.ServiceProvider.GetRequiredService<RepositoryContext>();
+            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var jwtService = scope.ServiceProvider.GetRequiredService<IJwtService>();
+ 
+            await dbContext.Database.MigrateAsync();
+
+            var seeder = new DatabaseSeeder(dbContext, userManager, jwtService);
+            await seeder.SeedAsync();
+        }
+        
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
             builder.UseEnvironment("Integration");
@@ -36,8 +49,8 @@ namespace CoreService.IntegrationTests.Tools
             
             builder.ConfigureServices(ConfigureServices);
         }
-
-        private async void ConfigureServices(IServiceCollection services)
+        
+        private void ConfigureServices(IServiceCollection services)
         {
             var publishEndpointMock = new Mock<IPublishEndpoint>();
             
@@ -46,21 +59,6 @@ namespace CoreService.IntegrationTests.Tools
                 .Returns(Task.CompletedTask);
             
             services.AddSingleton(publishEndpointMock.Object);
-            
-            //ToDo: why the fuck my web application factory handles migration?
-            if (Interlocked.Exchange(ref _migrationsApplied, 1) != 0) return;
-            
-            var serviceProvider = services.BuildServiceProvider();
-            using var scope = serviceProvider.CreateScope();
-            var dbContext = scope.ServiceProvider.GetRequiredService<RepositoryContext>();
-            var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-            var jwtService = scope.ServiceProvider.GetRequiredService<IJwtService>();
- 
-            dbContext.Database.Migrate();
-           // await dbContext.Database.MigrateAsync(); throw error
-
-            var seeder = new DatabaseSeeder(dbContext, userManager, jwtService);
-            await seeder.SeedAsync();
         }
     }
 }

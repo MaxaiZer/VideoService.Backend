@@ -120,6 +120,7 @@ namespace CoreService.IntegrationTests.Tools
                 await container.StartAsync();
 
             await EnsurePostgresIsReady();
+            await new TestingWebAppFactory().RunMigration();
         }
 
         public async Task DisposeAsync()
