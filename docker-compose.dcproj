@@ -10,6 +10,7 @@
     <DockerServiceName>API</DockerServiceName>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="docker-compose.debug.yml" />
     <None Include="docker-compose.yml" />
     <None Include=".dockerignore" />
   </ItemGroup>
