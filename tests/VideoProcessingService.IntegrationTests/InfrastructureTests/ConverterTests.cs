@@ -1,6 +1,5 @@
 using FluentAssertions;
-using Microsoft.Extensions.Configuration;
-using Moq;
+using Microsoft.Extensions.Options;
 using VideoProcessingService.Core.Models;
 using VideoProcessingService.Infrastructure.Video;
 using VideoProcessingService.IntegrationTests.Tools;
@@ -19,13 +18,23 @@ public class ConverterTests: IClassFixture<FFmpegFixture>
     [Fact]
     public async Task HlsConversion_WhenValidFile_ShouldBeSuccessful()
     {
-        var mockConfig = new Mock<IConfiguration>();
-        mockConfig.Setup(c => c["ffmpegPath"]).Returns(_ffmpegPath);
+        var config = new ConversionConfiguration
+        {
+            Resolutions = new List<Resolution>
+            {
+                new() { Width = 1280, Height = 720, Bitrate = "5000k" },
+                new() { Width = 854, Height = 480, Bitrate = "3000k" },
+                new() { Width= 640, Height = 360, Bitrate = "1500k" }
+            },
+            FFmpegPath = _ffmpegPath
+        };
+        var mockOptions = Options.Create(config);
+  
         string tmpDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
         Directory.CreateDirectory(tmpDirectory);
 
         var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestData/rabbit320.mp4");
-        var videoConverter = new VideoConverter(mockConfig.Object);
+        var videoConverter = new VideoConverter(mockOptions);
 
         ConversionResult result;
         try

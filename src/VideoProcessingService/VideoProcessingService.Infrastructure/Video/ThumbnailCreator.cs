@@ -1,4 +1,4 @@
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace VideoProcessingService.Infrastructure.Video;
 
@@ -8,9 +8,9 @@ public class ThumbnailCreator
 {
     private readonly MediaProcessor _processor;
     
-    public ThumbnailCreator(IConfiguration configuration)
+    public ThumbnailCreator(IOptions<ConversionConfiguration> conversionConfig)
     {
-        _processor = new MediaProcessor(configuration);
+        _processor = new MediaProcessor(conversionConfig);
     }
 
     public async Task<ThumbnailCreationResult> Create(string videoPath, int frameTimeInSec)

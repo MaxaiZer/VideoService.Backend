@@ -24,6 +24,10 @@ public static class DependencyInjection
             .ConfigureMassTransit(configuration)
             .ConfigureLoggerService(configuration);
 
+        services.AddOptions<ConversionConfiguration>()
+            .Bind(configuration.GetSection(ConversionConfiguration.Section))
+            .ValidateDataAnnotations();
+        
         services.AddScoped<IVideoConverter, VideoConverter>();
         services.AddScoped<IFileStorage, MinioFileStorage>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();

@@ -1,6 +1,6 @@
 using System.Diagnostics;
 using System.Text;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace VideoProcessingService.Infrastructure.Video;
 
@@ -12,13 +12,13 @@ public class MediaProcessor
         FFprobe
     }
     
-    private readonly string? _ffmpegPath;
-    private readonly string? _ffprobePath;
+    private readonly string? _ffmpegCustomPath;
+    private readonly string? _ffprobeCustomPath;
     
-    public MediaProcessor(IConfiguration configuration)
+    public MediaProcessor(IOptions<ConversionConfiguration> conversionConfig)
     {
-        _ffmpegPath = configuration["ffmpegPath"];
-        _ffprobePath = configuration["ffprobePath"];
+        _ffmpegCustomPath = conversionConfig.Value.FFmpegPath;
+        _ffprobeCustomPath = conversionConfig.Value.FFprobePath;
     }
     
     public async Task StartProcess(Program program, string workingDirectory, string arguments)
@@ -28,10 +28,10 @@ public class MediaProcessor
         switch (program)
         {
             case Program.FFmpeg:
-                programPath = string.IsNullOrEmpty(_ffmpegPath) ? "ffmpeg" : _ffmpegPath;
+                programPath = string.IsNullOrEmpty(_ffmpegCustomPath) ? "ffmpeg" : _ffmpegCustomPath;
                 break;
             case Program.FFprobe:
-                programPath = string.IsNullOrEmpty(_ffprobePath) ? "ffprobe" : _ffprobePath;
+                programPath = string.IsNullOrEmpty(_ffprobeCustomPath) ? "ffprobe" : _ffprobeCustomPath;
                 break;
             default:
                 throw new NotImplementedException();
