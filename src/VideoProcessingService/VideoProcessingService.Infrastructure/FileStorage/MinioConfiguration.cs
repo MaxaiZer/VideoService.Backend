@@ -4,7 +4,6 @@ namespace VideoProcessingService.Infrastructure.FileStorage;
 
 public class MinioConfiguration
 {
-    [Required]
     public static string Section => "MinIO";
     [Required]
     public string Endpoint { get; init; }

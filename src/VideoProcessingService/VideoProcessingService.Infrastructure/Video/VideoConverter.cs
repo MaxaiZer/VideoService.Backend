@@ -29,7 +29,7 @@ namespace VideoProcessingService.Infrastructure.Video
             //ToDo: check if video has audio
             string arguments = BuildHlsConversionArgs(inputFilePath, masterPlaylistName, addLetterbox: true);
             
-            Stopwatch stopwatch = new Stopwatch();
+            var stopwatch = new Stopwatch();
             stopwatch.Start();
             
             await _processor.StartProcess(MediaProcessor.Program.FFmpeg, outputDirectory, arguments);
