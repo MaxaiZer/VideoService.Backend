@@ -1,16 +1,19 @@
-services:
+#services:
 
-  VideoProcessingService:
-    image: ghcr.io/maxaizer/video-processing-service:debug
-    build:
-      dockerfile: src/VideoProcessingService/VideoProcessingService.App/DockerfileDebug
+  # to be able to debug container
+  #VideoProcessingService:
+  #  image: ghcr.io/maxaizer/video-processing-service:debug
+  #  build:
+  #    dockerfile: src/VideoProcessingService/VideoProcessingService.App/DockerfileDebug
 
-  CoreService:
-    image: ghcr.io/maxaizer/video-core-service:debug
-    build:
-      dockerfile: src/CoreService/CoreService.Api/DockerfileDebug
-      
-  rabbitmq:
-    image: rabbitmq:3.13-management
-    ports:
-    - "127.0.0.1:15672:15672"
+  # to be able to debug container
+  #CoreService:
+  #  image: ghcr.io/maxaizer/video-core-service:debug
+  #  build:
+  #    dockerfile: src/CoreService/CoreService.Api/DockerfileDebug
+   
+  # to be able to monitor rabbitmq via browser    
+  #rabbitmq:
+  #  image: rabbitmq:3.13-management
+  #  ports:
+  #  - "127.0.0.1:15672:15672"
