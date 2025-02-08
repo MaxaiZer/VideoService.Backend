@@ -73,6 +73,24 @@ namespace CoreService.Api.Controllers
             return Ok(videos);
         }
         
+        [HttpGet("mine")]
+        [Authorize]
+        public async Task<IActionResult> GetMyVideos([FromQuery]VideoParameters parameters, CancellationToken cancellationToken)
+        {
+            var userId = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+    
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Unauthorized("Missing user ID in token.");
+            }
+
+            parameters.UserId = userId;
+            var videos = await _videoService.GetVideosMetadata(parameters, cancellationToken);
+    
+            if (videos == null || videos.Count == 0) return NoContent();
+            return Ok(videos);
+        }
+        
         /// <summary>
         /// Retrieves a video metadata.
         /// </summary>

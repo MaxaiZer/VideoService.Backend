@@ -3,6 +3,7 @@ using Domain.Entities;
 using CoreService.Application.Dto;
 using CoreService.Application.Interfaces;
 using CoreService.Application.Interfaces.Services;
+using CoreService.Application.Common.Extensions;
 using Shared.Messages;
 
 namespace CoreService.Application.Services
@@ -60,8 +61,7 @@ namespace CoreService.Application.Services
         public async Task<List<ViewableVideoMetadata>> GetVideosMetadata(VideoParameters parameters,
             CancellationToken cancellationToken = default)
         {
-            return await _unitOfWork.Videos.FindViewableAsync(parameters.SearchQuery, parameters.PageNumber,
-                parameters.PageSize, cancellationToken);
+            return await _unitOfWork.Videos.FindViewableAsync(parameters.ToDomain(), cancellationToken);
         }
         
         public async Task<GeneratedUploadUrlDto> GetUploadUrl()

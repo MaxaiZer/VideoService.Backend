@@ -22,7 +22,7 @@ namespace CoreService.IntegrationTests.Tests
         }
 
         [Fact]
-        public async Task GetUploadUrl_WhenUnauthorizedUser_ShouldReturnUnauthorized()
+        public async Task GetUploadUrl_WhenUnauthorizedUser_ShouldReturn401()
         {
             var response = await _client.GetAsync($"{_baseUrl}/upload-url");
             response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
@@ -53,7 +53,7 @@ namespace CoreService.IntegrationTests.Tests
         }
         
         [Fact]
-        public async Task GetVideosMetadata_WhenVideoProcessed_ShouldBeSuccessful()
+        public async Task GetVideosMetadata_WhenProcessedVideosExist_ShouldNotBeEmpty()
         {
             var response = await _client.GetAsync($"{_baseUrl}");
             response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -64,7 +64,45 @@ namespace CoreService.IntegrationTests.Tests
         }
         
         [Fact]
-        public async Task UploadVideo_WhenUnauthorizedUser_ShouldReturnUnauthorized()
+        public async Task GetVideosMetadata_FilterByUserId_ShouldReturnCorrectVideos()
+        {
+            //for existing video
+            var response = await _client.GetAsync($"{_baseUrl}?userId={DatabaseSeeder.processedVideo.UserId}");
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            
+            var viewableVideos = await response.Content.ReadFromJsonAsync<List<ViewableVideoMetadata>>();
+            viewableVideos.Should().NotBeNull();
+            viewableVideos.Should().HaveCount(1);
+            viewableVideos[0].Id.Should().Be(DatabaseSeeder.processedVideo.Id);
+            
+            //for not existing video
+            response = await _client.GetAsync($"{_baseUrl}?userId={DatabaseSeeder.processedVideo.UserId + "x"}");
+            response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        }
+        
+        [Fact]
+        public async Task GetMyVideos_WhenUnauthorizedUser_ShouldReturn401()
+        {
+            var response = await _client.GetAsync($"{_baseUrl}/mine");
+            response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+        }
+        
+        [Fact]
+        public async Task GetMyVideos_WhenAuthorizedUser_ShouldBeSuccessful()
+        {
+            var user = DatabaseSeeder.usersWithActiveTokens[0];
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", user.AccessToken);
+            var response = await _client.GetAsync($"{_baseUrl}/mine");
+            response.StatusCode.Should().Be(HttpStatusCode.OK);
+            
+            var viewableVideos = await response.Content.ReadFromJsonAsync<List<ViewableVideoMetadata>>();
+            viewableVideos.Should().NotBeNull();
+            viewableVideos.Should().NotBeEmpty();
+            viewableVideos[0].UserId.Should().Be(user.Id);
+        }
+        
+        [Fact]
+        public async Task UploadVideo_WhenUnauthorizedUser_ShouldReturn401()
         {
             var response = await UploadVideoInfo(
                 new VideoUploadDto
@@ -78,7 +116,7 @@ namespace CoreService.IntegrationTests.Tests
         }
 
         [Fact]
-        public async Task UploadVideo_WhenValidUserUploadsVideo_ShouldBeSuccessful()
+        public async Task UploadVideo_WhenAuthorizedUser_ShouldBeSuccessful()
         {
             _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", DatabaseSeeder.usersWithActiveTokens[0].AccessToken);
             var tempFilePath = Path.GetTempFileName();

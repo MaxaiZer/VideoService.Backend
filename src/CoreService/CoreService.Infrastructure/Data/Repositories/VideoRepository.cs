@@ -30,22 +30,25 @@ namespace CoreService.Infrastructure.Data.Repositories
                 .FirstOrDefaultAsync(cancellationToken);
         }
 
-        public async Task<List<ViewableVideoMetadata>> FindViewableAsync(string? searchQuery, int pageNumber,
-            int pageSize, CancellationToken cancellationToken = default)
+        public async Task<List<ViewableVideoMetadata>> FindViewableAsync(VideoSearchParameters parameters,
+            CancellationToken cancellationToken = default)
         {
-            var minSimilarityThreshold = 0.1;
-
             var query = context.Videos.Where(video => video.Processed);
-            if (!string.IsNullOrWhiteSpace(searchQuery))
+            
+            if (!string.IsNullOrEmpty(parameters.UserId))
             {
+                query = query.Where(video => video.UserId == parameters.UserId);
+            }
+            
+            if (!string.IsNullOrWhiteSpace(parameters.SearchQuery))
+            {
+                const float minSimilarityThreshold = 0.1f;
                 query = query
-                    .Where(video => EF.Functions.TrigramsSimilarity(video.Name, searchQuery) >= minSimilarityThreshold)
-                    .OrderByDescending(video => EF.Functions.TrigramsSimilarity(video.Name, searchQuery));
+                    .Where(video => EF.Functions.TrigramsSimilarity(video.Name, parameters.SearchQuery) >= minSimilarityThreshold)
+                    .OrderByDescending(video => EF.Functions.TrigramsSimilarity(video.Name, parameters.SearchQuery));
             }
 
-            return await query.Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .Join(context.Users, 
+            return await query.Join(context.Users, 
                     video => video.UserId, 
                     user => user.Id,
                     (video, user) => new ViewableVideoMetadata(
@@ -55,6 +58,8 @@ namespace CoreService.Infrastructure.Data.Repositories
                         video.Name,
                         video.Description,
                         video.CreatedAt))
+                .Skip((parameters.PageNumber - 1) * parameters.PageSize)
+                .Take(parameters.PageSize)
                 .AsNoTracking()
                 .ToListAsync(cancellationToken);
         }
