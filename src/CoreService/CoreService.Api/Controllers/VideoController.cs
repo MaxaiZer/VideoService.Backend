@@ -61,7 +61,7 @@ namespace CoreService.Api.Controllers
         /// Retrieves a videos metadata.
         /// </summary>
         /// <param name="parameters">Search parameters</param>
-        /// <returns>HTTP 200 status code with video metadata if the video exists.</returns>
+        /// <returns>HTTP 200 status code with videos metadata.</returns>
         /// <response code="200">Videos metadata retrieved successfully.</response>
         /// <response code="204">Videos not found.</response>
         [HttpGet]
@@ -73,6 +73,14 @@ namespace CoreService.Api.Controllers
             return Ok(videos);
         }
         
+        /// <summary>
+        /// Retrieves a current user's videos metadata.
+        /// </summary>
+        /// <param name="parameters">Search parameters</param>
+        /// <returns>HTTP 200 status code with videos metadata.</returns>
+        /// <response code="200">Videos metadata retrieved successfully.</response>
+        /// <response code="204">Videos not found.</response>
+        /// <response code="401">Authentication failed.</response>
         [HttpGet("mine")]
         [Authorize]
         public async Task<IActionResult> GetMyVideos([FromQuery]VideoParameters parameters, CancellationToken cancellationToken)
