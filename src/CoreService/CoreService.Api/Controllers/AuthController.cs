@@ -90,9 +90,9 @@ namespace CoreService.Api.Controllers
         /// <returns>HTTP 200 status code if revoke is successful; otherwise, returns a 401 status code if authentication fails.</returns>
         /// <response code="200">Refresh token revoked successfully.</response>
         /// <response code="401">Authentication failed.</response>
-        [HttpPost("revoke")]
+        [HttpPost("logout")]
         [Authorize]
-        public async Task<IActionResult> Revoke()
+        public async Task<IActionResult> Logout()
         {
             var userId = User?.FindFirst(ClaimTypes.NameIdentifier)?.Value;
             if (string.IsNullOrEmpty(userId))
