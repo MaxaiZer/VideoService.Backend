@@ -7,11 +7,10 @@ namespace CoreService.Application.Interfaces
         IVideoRepository Videos { get; }
         IVideoProcessingRequestRepository VideoProcessingRequests { get; }
 
-        void BeginTransaction();
+        Task BeginTransactionAsync();
 
-        void CommitTransaction();
+        Task CommitTransactionAsync();
 
-        void RollbackTransaction();
-        void Save();
+        Task RollbackTransactionAsync();
     }
 }

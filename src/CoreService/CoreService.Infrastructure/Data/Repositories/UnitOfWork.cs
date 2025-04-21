@@ -20,38 +20,35 @@ namespace CoreService.Infrastructure.Data.Repositories
         public IVideoRepository Videos => new VideoRepository(_context);
         public IVideoProcessingRequestRepository VideoProcessingRequests => new VideoProcessingRequestRepository(_context);
 
-        public void BeginTransaction()
+        public async Task BeginTransactionAsync()
         {
             if (_transaction != null)
                 throw new InvalidOperationException("A transaction is already in progress.");
 
-            _transaction = _context.Database.BeginTransaction();
+            _transaction = await _context.Database.BeginTransactionAsync();
         }
 
-        public void CommitTransaction()
+        public async Task CommitTransactionAsync()
         {
             if (_transaction == null)
                 throw new InvalidOperationException("No transaction is in progress.");
 
-            _transaction.Commit();
-            _transaction.Dispose();
+            await _context.SaveChangesAsync();
+            await _transaction.CommitAsync();
+            await _transaction.DisposeAsync();
             _transaction = null;
         }
 
-        public void RollbackTransaction()
+        public async Task RollbackTransactionAsync()
         {
             if (_transaction == null)
                 throw new InvalidOperationException("No transaction is in progress.");
 
-            _transaction.Rollback();
-            _transaction.Dispose();
+            await _transaction.RollbackAsync();
+            await _transaction.DisposeAsync();
             _transaction = null;
         }
         
-        public void Save()
-        {
-            _context.SaveChanges();
-        }
         public void Dispose()
         {
             Dispose(true);

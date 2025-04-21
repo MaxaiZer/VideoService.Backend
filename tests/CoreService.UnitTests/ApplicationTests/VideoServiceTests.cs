@@ -39,12 +39,10 @@ namespace CoreService.UnitTests.ApplicationTests
 
             _mockUnitOfWork.Setup(uow => uow.Videos.Create(It.IsAny<Video>()));
             _mockUnitOfWork.Setup(uow => uow.VideoProcessingRequests.Create(It.IsAny<VideoProcessingRequest>()));
-            _mockUnitOfWork.Setup(uow => uow.Save());
 
             await _videoService.AddVideo(videoUploadDto);
 
             _mockUnitOfWork.Verify(uow => uow.Videos.Create(It.IsAny<Video>()), Times.Once);
-            _mockUnitOfWork.Verify(uow => uow.Save(), Times.Once);
         }
 
         [Fact]

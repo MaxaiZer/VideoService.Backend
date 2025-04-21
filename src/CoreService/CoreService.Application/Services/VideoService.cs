@@ -32,22 +32,20 @@ namespace CoreService.Application.Services
                     VideoProcessingRequest.ProcessingStatus.Appending);
                 var video = new Video(videoUpload.VideoFileId, videoUpload.Name, videoUpload.UserId, videoUpload.Description);
                 
-                _unitOfWork.BeginTransaction();
+                await _unitOfWork.BeginTransactionAsync();
                 
                 _unitOfWork.VideoProcessingRequests.Create(request);
                 _unitOfWork.Videos.Create(video);
                 
                 await _eventBus.PublishAsync(new VideoReadyForProcessing { RequestId = request.Id});
-                
-                _unitOfWork.Save();
-                _unitOfWork.CommitTransaction();
+                await _unitOfWork.CommitTransactionAsync();
             }
             catch (Exception ex)
             {
                 _logger.LogError($"Something went wrong in the " +
                     $"{nameof(AddVideo)} service method: {ex}");
                 
-                _unitOfWork.RollbackTransaction();
+                await _unitOfWork.RollbackTransactionAsync();
                 throw;
             }
         }
