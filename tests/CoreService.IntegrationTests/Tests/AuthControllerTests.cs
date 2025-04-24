@@ -188,7 +188,7 @@ public class AuthControllerTests: IClassFixture<TestingWebAppFactory>
             var tokenDto = new AccessTokenDto(AccessToken: user.AccessToken);
             _client.DefaultRequestHeaders.Add("Cookie", $"refreshToken={user.RefreshToken}");
             
-            var response1 = await _client.PostAsync(_baseUrl + "/revoke", null);
+            var response1 = await _client.PostAsync(_baseUrl + "/logout", null);
             var response2 = await _client.PostAsJsonAsync(_baseUrl + "/refresh", tokenDto);
             
             response1.StatusCode.Should().Be(HttpStatusCode.OK);
