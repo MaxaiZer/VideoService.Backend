@@ -1,5 +1,7 @@
 using FluentAssertions;
 using Microsoft.Extensions.Options;
+using Moq;
+using VideoProcessingService.Core.Interfaces;
 using VideoProcessingService.Core.Models;
 using VideoProcessingService.Infrastructure.Video;
 using VideoProcessingService.IntegrationTests.Tools;
@@ -9,10 +11,12 @@ namespace VideoProcessingService.IntegrationTests.InfrastructureTests;
 public class ConverterTests: IClassFixture<FFmpegFixture>
 {
     private readonly string _ffmpegPath;
+    private readonly string _ffprobePath;
 
     public ConverterTests(FFmpegFixture ffmpeg)
     {
         _ffmpegPath = ffmpeg.FFmpegPath;
+        _ffprobePath = ffmpeg.FFprobePath;
     }
 
     [Fact]
@@ -26,7 +30,8 @@ public class ConverterTests: IClassFixture<FFmpegFixture>
                 new() { Width = 854, Height = 480, Bitrate = "3000k" },
                 new() { Width= 640, Height = 360, Bitrate = "1500k" }
             },
-            FFmpegPath = _ffmpegPath
+            FFmpegPath = _ffmpegPath,
+            FFprobePath = _ffprobePath
         };
         var mockOptions = Options.Create(config);
   
@@ -34,7 +39,7 @@ public class ConverterTests: IClassFixture<FFmpegFixture>
         Directory.CreateDirectory(tmpDirectory);
 
         var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestData/rabbit320.mp4");
-        var videoConverter = new VideoConverter(mockOptions);
+        var videoConverter = new VideoConverter(new Mock<ILoggerManager>().Object, mockOptions);
 
         ConversionResult result;
         try

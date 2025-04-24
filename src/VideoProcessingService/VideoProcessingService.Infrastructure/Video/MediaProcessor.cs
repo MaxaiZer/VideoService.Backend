@@ -21,7 +21,7 @@ public class MediaProcessor
         _ffprobeCustomPath = conversionConfig.Value.FFprobePath;
     }
     
-    public async Task StartProcess(Program program, string workingDirectory, string arguments)
+    public async Task<string> StartProcess(Program program, string workingDirectory, string arguments)
     {
         string programPath;
 
@@ -50,10 +50,17 @@ public class MediaProcessor
 
         using Process process = new();
         process.StartInfo = processStartInfo;
-        process.OutputDataReceived += (sender, args) => Console.WriteLine(args.Data);
-            
+
+        var output = new StringBuilder();
         var errors = new StringBuilder();
-            
+        
+        process.OutputDataReceived += (sender, args) =>
+        {
+            if (args.Data != null)
+            {
+                output.AppendLine(args.Data);
+            }
+        };
         process.ErrorDataReceived += (sender, args) =>
         {
             if (args.Data != null)
@@ -73,5 +80,6 @@ public class MediaProcessor
             
       //  if (process.ExitCode != 0) //don't use errors.Length != 0, ffmpeg logs all in error
       //      throw new Exception($"FFmpeg exited with code {process.ExitCode} and error: " + errors);
+        return output.ToString();
     }
 }

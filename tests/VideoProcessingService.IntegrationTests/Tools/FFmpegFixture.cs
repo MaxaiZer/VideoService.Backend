@@ -6,6 +6,7 @@ namespace VideoProcessingService.IntegrationTests.Tools
     public class FFmpegFixture : IDisposable
     {
         public string FFmpegPath { get; private set; }
+        public string FFprobePath { get; private set; }
         public bool deleteFFmpegOnDispose = false;
 
         private readonly string _ffmpegArchivePath = Path.Combine(Path.GetTempPath(), "ffmpeg_archive");
@@ -18,11 +19,12 @@ namespace VideoProcessingService.IntegrationTests.Tools
                 Directory.CreateDirectory(_ffmpegDirPath);
             
             FFmpegPath = DownloadAndExtractFFmpegAsync().GetAwaiter().GetResult();
+            FFprobePath = FindExecutable(_ffmpegDirPath, "ffprobe");
         }
 
         private async Task<string> DownloadAndExtractFFmpegAsync()
         {
-            var executable = FindExecutable(_ffmpegDirPath);
+            var executable = FindExecutable(_ffmpegDirPath, "ffmpeg");
             if (executable != null)
             {
                 return executable;
@@ -78,12 +80,12 @@ namespace VideoProcessingService.IntegrationTests.Tools
                 await process.WaitForExitAsync();
             }
 
-            return FindExecutable(_ffmpegDirPath) ?? throw new Exception("Error during installing ffmpeg");
+            return FindExecutable(_ffmpegDirPath, "ffmpeg") ?? throw new Exception("Error during installing ffmpeg");
         }
 
-        private string? FindExecutable(string directory)
+        private string? FindExecutable(string directory, string name)
         {
-            string ffmpegExecutableName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? "ffmpeg.exe" : "ffmpeg";
+            string ffmpegExecutableName = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? $"{name}.exe" : name;
             string[] foundFiles = Directory.GetFiles(directory, ffmpegExecutableName, SearchOption.AllDirectories);
 
             if (foundFiles.Length > 0)
