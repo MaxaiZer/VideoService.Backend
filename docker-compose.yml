@@ -15,6 +15,7 @@ services:
       MessageBroker__USERNAME: ${RABBITMQ_USER}
       MessageBroker__PASSWORD: ${RABBITMQ_PASSWORD}
       DB_CONNECTION_STRING: "Server=db;Port=5432;Database=${POSTGRES_DB};User Id=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};"
+      ASPNETCORE_ENVIRONMENT: ${ENVIRONMENT}
     depends_on:
       db:
         condition: service_healthy
@@ -46,7 +47,7 @@ services:
       JWT__AccessLifetime: ${JWT_ACCESS_LIFETIME}
       JWT__RefreshLifetime: ${JWT_REFRESH_LIFETIME}
       JWT__SECRET: ${JWT_SECRET}
-      #ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_ENVIRONMENT: ${ENVIRONMENT}
       ASPNETCORE_HTTP_PORTS: 8080
     depends_on:
       db:
