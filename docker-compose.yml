@@ -16,6 +16,7 @@ services:
       MessageBroker__PASSWORD: ${RABBITMQ_PASSWORD}
       DB_CONNECTION_STRING: "Server=db;Port=5432;Database=${POSTGRES_DB};User Id=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};"
       ASPNETCORE_ENVIRONMENT: ${ENVIRONMENT}
+      CONVERSION__ResolutionsJson: ${RESOLUTIONS_JSON}
     depends_on:
       db:
         condition: service_healthy

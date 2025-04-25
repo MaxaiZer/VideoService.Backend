@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 
 namespace VideoProcessingService.Infrastructure.Video;
 
@@ -13,7 +14,13 @@ public class ConversionConfiguration
 {
     public static string Section => "Conversion";
 
-    public List<Resolution> Resolutions { get; set; } = [];
+    [Required]
+    public string ResolutionsJson { get; set; }
+    
+    public List<Resolution>? Resolutions =>
+        string.IsNullOrWhiteSpace(ResolutionsJson)
+            ? new()
+            : JsonSerializer.Deserialize<List<Resolution>>(ResolutionsJson);
     
     [Required]
     public int SegmentDurationInSeconds { get; set; }

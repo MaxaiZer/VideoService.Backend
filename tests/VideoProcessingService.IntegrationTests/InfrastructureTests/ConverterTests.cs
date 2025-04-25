@@ -24,12 +24,9 @@ public class ConverterTests: IClassFixture<FFmpegFixture>
     {
         var config = new ConversionConfiguration
         {
-            Resolutions = new List<Resolution>
-            {
-                new() { Width = 1280, Height = 720, Bitrate = "5000k" },
-                new() { Width = 854, Height = 480, Bitrate = "3000k" },
-                new() { Width= 640, Height = 360, Bitrate = "1500k" }
-            },
+            ResolutionsJson="[{\"Width\":1280,\"Height\":720,\"Bitrate\":\"5000k\"}," +
+                            "{\"Width\":854,\"Height\":480,\"Bitrate\":\"3000k\"}," +
+                            "{\"Width\":640,\"Height\":360,\"Bitrate\":\"1500k\"}]\n",
             SegmentDurationInSeconds = 10,
             AddLetterbox = true,
             FFmpegPath = _ffmpegPath,
