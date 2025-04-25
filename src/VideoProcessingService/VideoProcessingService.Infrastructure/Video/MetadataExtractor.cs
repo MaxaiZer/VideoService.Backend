@@ -27,7 +27,7 @@ public class MetadataExtractor
         );
 
         if (!double.TryParse(durationOutput.Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out double durationSeconds))
-            throw new Exception("Cannot determine video duration");
+            throw new Exception($"Cannot determine video duration, output: '{durationOutput}'");
 
         return durationSeconds;
     }
