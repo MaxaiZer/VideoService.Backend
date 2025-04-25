@@ -47,6 +47,9 @@ namespace VideoProcessingService.Infrastructure.Video
             var playlists = Directory.GetFiles(outputDirectory, "*.m3u8").ToList();
             playlists.Remove(masterPlaylistPath);
 
+            if (segments.Count == 0)
+                throw new Exception("No video segments generated after conversion");
+
             LogSegmentsSize(segments);
             
             var durationSeconds = await extractor.VideoDuration(segments.First());
