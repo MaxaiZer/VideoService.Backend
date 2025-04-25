@@ -47,6 +47,10 @@ namespace CoreService.Infrastructure.Data.Repositories
                     .Where(video => EF.Functions.TrigramsSimilarity(video.Name, parameters.SearchQuery) >= minSimilarityThreshold)
                     .OrderByDescending(video => EF.Functions.TrigramsSimilarity(video.Name, parameters.SearchQuery));
             }
+            else
+            {
+                query = query.OrderByDescending(video => video.CreatedAt);
+            }
 
             return await query.Join(context.Users, 
                     video => video.UserId, 
