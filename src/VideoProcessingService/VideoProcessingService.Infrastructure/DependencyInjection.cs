@@ -26,7 +26,8 @@ public static class DependencyInjection
 
         services.AddOptions<ConversionConfiguration>()
             .Bind(configuration.GetSection(ConversionConfiguration.Section))
-            .ValidateDataAnnotations();
+            .ValidateDataAnnotations()
+            .ValidateOnStart();
         
         services.AddScoped<IVideoConverter, VideoConverter>();
         services.AddScoped<IFileStorage, MinioFileStorage>();

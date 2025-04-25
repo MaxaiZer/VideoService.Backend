@@ -20,7 +20,7 @@ public class ConverterTests: IClassFixture<FFmpegFixture>
     }
 
     [Fact]
-    public async Task HlsConversion_WhenValidFile_ShouldBeSuccessful()
+    public async Task HlsMultiResolutionConversion_WhenValidFile_ShouldBeSuccessful()
     {
         var config = new ConversionConfiguration
         {
@@ -30,6 +30,8 @@ public class ConverterTests: IClassFixture<FFmpegFixture>
                 new() { Width = 854, Height = 480, Bitrate = "3000k" },
                 new() { Width= 640, Height = 360, Bitrate = "1500k" }
             },
+            SegmentDurationInSeconds = 10,
+            AddLetterbox = true,
             FFmpegPath = _ffmpegPath,
             FFprobePath = _ffprobePath
         };
@@ -52,6 +54,39 @@ public class ConverterTests: IClassFixture<FFmpegFixture>
         
             HlsParser.ExtractFirstPlaylistUrl(masterPlaylistContent).Should().NotBeNullOrEmpty();
             HlsParser.ExtractFirstSegmentUrl(playlistContent).Should().NotBeNullOrEmpty();
+        }
+        finally
+        {
+            Directory.Delete(tmpDirectory, recursive: true);
+        }
+    }
+    
+    [Fact]
+    public async Task HlsConversion_WhenValidFile_ShouldBeSuccessful()
+    {
+        var config = new ConversionConfiguration
+        {
+            FFmpegPath = _ffmpegPath,
+            FFprobePath = _ffprobePath,
+            SegmentDurationInSeconds = 10
+        };
+        var mockOptions = Options.Create(config);
+  
+        string tmpDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
+        Directory.CreateDirectory(tmpDirectory);
+
+        var filePath = Path.Combine(Directory.GetCurrentDirectory(), "TestData/rabbit320.mp4");
+        var videoConverter = new VideoConverter(new Mock<ILoggerManager>().Object, mockOptions);
+
+        ConversionResult result;
+        try
+        {
+            result = await videoConverter.ConvertAsync(filePath, tmpDirectory);
+            result.Should().NotBeNull();
+
+            //without resolutions master playlist is the only playlist
+            string masterPlaylistContent = await File.ReadAllTextAsync(result.IndexFilePath);
+            HlsParser.ExtractFirstSegmentUrl(masterPlaylistContent).Should().NotBeNullOrEmpty();
         }
         finally
         {

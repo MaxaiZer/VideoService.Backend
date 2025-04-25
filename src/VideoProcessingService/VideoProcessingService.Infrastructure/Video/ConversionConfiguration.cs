@@ -12,9 +12,14 @@ public class Resolution
 public class ConversionConfiguration
 {
     public static string Section => "Conversion";
+
+    public List<Resolution> Resolutions { get; set; } = [];
     
     [Required]
-    public List<Resolution> Resolutions { get; init; }
+    public int SegmentDurationInSeconds { get; set; }
+    
+    [Required]
+    public bool AddLetterbox { get; set; }
     
     public string? FFmpegPath { get; set; }
     
